@@ -246,4 +246,10 @@
 		background-color: rgb(209 213 219);
 		border-radius: 10px;
 	}
+
+	.active svg {
+		color: rgb(0, 0, 0);
+	}
+
+	
 </style>
