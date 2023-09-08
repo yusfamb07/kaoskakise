@@ -30,7 +30,7 @@
 
 	onMount(async () => {
 
-		if (!localStorage.getItem('token')) goto('/');
+		// 
 	});
 </script>
 
@@ -119,11 +119,37 @@
 									class:active={$page.url.pathname.includes('/user/tracking')}
 									>Tracking</a
 								>
-								<a
+								<div class="dropdown flex justify-center items-center ">
+									<button
+										type="button"
+										class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+										id="dropdownMenuButton1"
+										data-bs-toggle="dropdown"
+										aria-expanded="false"
+									>
+										<span class="sr-only">Open user menu</span>
+										<img
+											class="w-7 h-7 rounded-full "
+											src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+											alt="user photo"
+										/>
+									</button>
+									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+										
+										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Edit Profile</a></li>
+										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Upload Bukti Transfer</a></li>
+										<li>
+											<a class="dropdown-item hover:bg-gray-300" href="#!" on:click={logoutHandler}
+												>Logout</a
+											>
+										</li>
+									</ul>
+								</div>
+								<!-- <a
 									href="#!" on:click={logoutHandler}
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									>Sign Out</a
-								>
+								> -->
 								<!-- {#if (localStorage.getItem('token'))}
 								{:else}
 									<a
@@ -134,39 +160,39 @@
 								{/if} -->
 							{:else}
 								<a
-									href="/user/dashboard"
+									href="/guest/dashboard"
 									class=" text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/dashboard')}
+									class:active={$page.url.pathname.includes('//guest/dashboard')}
 									aria-current="page">Home</a
 								>
 								<a
-									href="/user/product"
+									href="/guest/product"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/product')}
+									class:active={$page.url.pathname.includes('/guest/product')}
 									>All Product</a
 								>
 								<a
-									href="/user/categories"
+									href="/guest/categories"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/categories')}
+									class:active={$page.url.pathname.includes('/guest/categories')}
 									>Categories</a
 								>
 								<a
-									href="/user/cart"
+									href="/login"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/cart')}
+									class:active={$page.url.pathname.includes('/login')}
 									>Cart</a
 								>
 								<a
-									href="/user/about"
+									href="/guest/about"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/about')}
+									class:active={$page.url.pathname.includes('/guest/about')}
 									>About</a
 								>
 								<a
-									href="/user/tracking"
+									href="/guest/tracking"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/user/tracking')}
+									class:active={$page.url.pathname.includes('/guest/tracking')}
 									>Tracking</a
 								>
 								<a
