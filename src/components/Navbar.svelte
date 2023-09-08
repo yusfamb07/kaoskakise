@@ -1,3 +1,39 @@
+<script>
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import Swal from 'sweetalert2';
+	import { goto } from '$app/navigation';
+	import { dataAPI } from '../routes/utils/axios';
+
+	const url_API = import.meta.env.VITE_API_DIGITAL;
+
+	function logoutHandler() {
+		localStorage.clear();
+		const Toast = Swal.mixin({
+			toast: true,
+			position: 'top-end',
+			showConfirmButton: false,
+			timer: 3000,
+			timerProgressBar: true,
+			didOpen: (toast) => {
+				toast.addEventListener('mouseenter', Swal.stopTimer);
+				toast.addEventListener('mouseleave', Swal.resumeTimer);
+			}
+		});
+
+		Toast.fire({
+			icon: 'success',
+			title: 'Sign out successfully'
+		});
+		goto('/login');
+	}
+
+	onMount(async () => {
+
+		if (!localStorage.getItem('token')) goto('/');
+	});
+</script>
+
 <nav class="bg-slate-50 sticky-top">
 	<div class="flex flex-shrink-0 justify-center">
 		<img class="block h-8 w-auto mt-2 lg:hidden" src="/logo3.png" alt="Sock Energy" />
@@ -46,42 +82,102 @@
 				<div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
 					<div class="hidden sm:ml-6 sm:block">
 						<div class="flex space-x-5">
+							{#if $page.url.pathname.includes('/user')}
+								<a
+									href="/user/dashboard"
+									class=" text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/dashboard')}
+									aria-current="page">Home</a
+								>
+								<a
+									href="/user/product"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/product')}
+									>All Product</a
+								>
+								<a
+									href="/user/categories"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/categories')}
+									>Categories</a
+								>
+								<a
+									href="/user/cart"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/cart')}
+									>Cart</a
+								>
+								<a
+									href="/user/about"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/about')}
+									>About</a
+								>
+								<a
+									href="/user/tracking"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/tracking')}
+									>Tracking</a
+								>
+								<a
+									href="#!" on:click={logoutHandler}
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									>Sign Out</a
+								>
+								<!-- {#if (localStorage.getItem('token'))}
+								{:else}
+									<a
+										href="/login" 
+										class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+										>Sign In</a
+									>
+								{/if} -->
+							{:else}
+								<a
+									href="/user/dashboard"
+									class=" text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/dashboard')}
+									aria-current="page">Home</a
+								>
+								<a
+									href="/user/product"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/product')}
+									>All Product</a
+								>
+								<a
+									href="/user/categories"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/categories')}
+									>Categories</a
+								>
+								<a
+									href="/user/cart"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/cart')}
+									>Cart</a
+								>
+								<a
+									href="/user/about"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/about')}
+									>About</a
+								>
+								<a
+									href="/user/tracking"
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									class:active={$page.url.pathname.includes('/user/tracking')}
+									>Tracking</a
+								>
+								<a
+									href="/login" 
+									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+									>Sign In</a
+								>
+
+							{/if}
+
 							<!-- Current: "bg-gray-900 text-black", Default: "text-black hover:bg-gray-200 hover:text-black" -->
-							<a
-								href="#"
-								class="bg-gray-200 text-black rounded-md px-3 py-2 font-medium"
-								aria-current="page">Home</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>All Product</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>Categories</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>Cart</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>About</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>Tracking</a
-							>
-							<a
-								href="#"
-								class="text-black hover:bg-gray-200 hover:text-black rounded-md px-3 py-2 font-medium"
-								>Sign Out</a
-							>
 						</div>
 					</div>
 				</div>
@@ -116,3 +212,10 @@
 		</div>
 	</div>
 </nav>
+
+<style>
+
+	.active{
+		background-color: rgb(209 213 219);
+	}
+</style>

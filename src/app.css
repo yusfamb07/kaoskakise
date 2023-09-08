@@ -5,29 +5,34 @@
 @font-face {
   font-family: nats;
   src: url(/NATS-Regular.ttf);
+}
 
-  /* src: url(./NATS-Regular.ttf); */
+@font-face {
+  font-family: belanosima;
+  src: url(/Belanosima-SemiBold.ttf);
 }
 
 .font-belanosima {
-  font-family: Belanosima, sans-serif;
-}
-
-.font-roboto {
-  font-family: "Roboto", sans-serif;
+  font-family: belanosima;
 }
 
 .font-nats {
   font-family: nats;
 }
 
+.font-roboto {
+  font-family: "Roboto", sans-serif;
+}
+
 .loader-container {
   margin-left: 14rem;
 }
+
 .load-title {
   margin-bottom: 0;
   margin-top: 5px;
 }
+
 .custom-loader {
   width: 50px;
   height: 50px;
@@ -38,6 +43,7 @@
   animation: s6 1s infinite linear;
   margin-right: 10px;
 }
+
 .custom-loader::before,
 .custom-loader::after {
   content: "";
@@ -46,12 +52,14 @@
   border: inherit;
   border-radius: 50%;
 }
+
 .custom-loader::before {
   border-color: #fbfdff #0000;
   animation: inherit;
   animation-duration: 0.5s;
   animation-direction: reverse;
 }
+
 .custom-loader::after {
   margin: 8px;
 }
@@ -120,4 +128,8 @@
   border-radius: 4px;
   width: 250px;
   height: 39px;
+}
+
+th {
+  background-color: rgb(209 213 219);
 }

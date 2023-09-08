@@ -1,6 +1,5 @@
 <script>
 	import { onMount } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { dataAPI } from '$utils/axios';
 	import Pagination from '$components/Pagination.svelte';
 	import Swal from 'sweetalert2';
@@ -41,21 +40,31 @@
 		prod_cate_id = '',
 		prod_desc = '',
 		prod_id = '',
-		fileInput;
+		prod_image = '',
+		fileInput = '';
+	let formData = {};
+
+	const handleFileChange = (event) => {
+		prod_image = event.target.files[0];
+	};
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
-		const formData = new FormData();
-		formData.append('prod_name', prod_name);
-		formData.append('prod_price',formatPrice(prod_price)) ;
-		formData.append('prod_desc', prod_desc);
-		formData.append('prod_cate_id', prod_cate_id);
+		const formDataUpload = new FormData();
+		formDataUpload.append('prod_name', formData.prod_name);
+		formDataUpload.append('prod_price',formatPrice(formData.prod_price)) ;
+		formDataUpload.append('prod_desc', formData.prod_desc);
+		formDataUpload.append('prod_cate_id', formData.prod_cate_id);
 		// formData.append('prod_qty', formData.prod_qty);
-		formData.append('prod_image', fileInput.files[0]);
+		formDataUpload.append('prod_image', prod_image);
 
-		// console.log(formData);
+		console.log(formDataUpload);
 		try {
-			const response = await dataAPI.post(`/products/store`, formData);
+			
+			const response = await dataAPI.post(
+				`/products/store`,
+				formDataUpload
+			);
 			if (response.status === 200) {
 				await Swal.fire({
 					icon: 'success',
@@ -385,14 +394,14 @@
 			<div class="grid grid-cols-2 gap-4">
 				<div class="mb-6">
 					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Product Name</label>
-					<input type="text" id="product-input" placeholder="Please input your product name" bind:value={prod_name} 												
+					<input type="text" id="product-input" placeholder="Please input your product name" bind:value={formData.prod_name} 												
 					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 				</div>
 
 				<div class="mb-6">
 					<label for="categories" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category Product</label>
 					<select on:change={fetchCategories}
-						bind:value={prod_cate_id} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md  focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+						bind:value={formData.prod_cate_id} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md  focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 						{#each categories as cate}
 							<option value={cate.cate_id}>{cate.cate_name}</option>
 						{/each}
@@ -408,7 +417,7 @@
 							<h5 class="text-black font-bold">RP</h5>
 						</span>
 						<input type="text" id="dengan-rupiah"
-							on:keyup={(e) => handleKeyUpWithRupiah(e.target)}  bind:value={prod_price}
+							on:keyup={(e) => handleKeyUpWithRupiah(e.target)}  bind:value={formData.prod_price}
 							class="rounded-none rounded-r-md bg-gray-50 border text-gray-900  focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm border-gray-300 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please input your price">
 					</div>
 				</div>
@@ -423,13 +432,13 @@
 			<div class="grid grid-cols-1 ">
 				<div class="mb-6">
 					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description </label>
-					<textarea id="descripstion" rows="4" bind:value={prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				
+					<textarea id="descripstion" rows="4" bind:value={formData.prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				
 				</div>	
 			</div>
 
 			<div class="grid grid-cols-1">
 				<label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload Image Product</label>
-				<input bind:this={fileInput} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
+				<input on:change={handleFileChange} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
 			</div>
 			
 		</div>

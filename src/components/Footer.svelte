@@ -32,12 +32,14 @@
 			<FooterLinkGroup
 				ulClass="flex flex-wrap items-center mb-6 text-sm text-gray-500 sm:mb-0 dark:text-gray-400"
 			>
+				<FooterLink href="/">Home</FooterLink>
+				<FooterLink href="/">All Product</FooterLink>
+				<FooterLink href="/">Categories</FooterLink>
+				<FooterLink href="/">Cart</FooterLink>
+				<FooterLink href="/">Tracking</FooterLink>
 				<FooterLink href="/">About</FooterLink>
-				<FooterLink href="/">Privacy Policy</FooterLink>
-				<!-- <FooterLink href="/">Licensing</FooterLink>
-				<FooterLink href="/">Contact</FooterLink> -->
 			</FooterLinkGroup>
 		</div>
+		<FooterCopyright href="/" by="Sockenergy" />
 	</div>
-	<FooterCopyright href="/" by="Sockenergy" />
 </Footer>
