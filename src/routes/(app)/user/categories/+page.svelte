@@ -2,10 +2,13 @@
 
 <div class="container lg mx-auto">
 	<h1 class="text-xl font-belanosima d-flex justify-center mt-4">CATEGORIES</h1>
+	<div class="flex justify-center ">
+		<div class="border-b border-black border-1  w-32 "></div>
+	</div>
 
-	<div class="grid grid-cols-3 gap-4 mt-4">
+	<div class="grid lg:grid-cols-3 sm:grid-cols-1 gap-4 mt-4">
 		<div class="card border-none">
-			<img src="/active.jpg" class="card-img-top" alt="..." />
+			<img src="/active.jpg" class="card-img-top lg: w-100 lg:h-auto sm:: w-20 sm:h-auto" alt="..." />
 			<div class=" bg-black h-35">
 				<h1 class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2">
 					Active Sock

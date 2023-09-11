@@ -2,7 +2,9 @@
 	import { onMount } from 'svelte';
 	import { dataAPI } from '$utils/axios';
 	import Pagination from '$components/Pagination.svelte';
+	// import Ckeditor from '$components/Ckeditor.svelte';
 	import Swal from 'sweetalert2';
+  	import Ckeditor from '$components/Ckeditor.svelte';
 	const url_API = import.meta.env.VITE_API_SOCK;
 
 	let page = parseInt(1),
@@ -53,7 +55,7 @@
 		const formDataUpload = new FormData();
 		formDataUpload.append('prod_name', formData.prod_name);
 		formDataUpload.append('prod_price',formatPrice(formData.prod_price)) ;
-		formDataUpload.append('prod_desc', formData.prod_desc);
+		formDataUpload.append('prod_desc', prod_desc);
 		formDataUpload.append('prod_cate_id', formData.prod_cate_id);
 		// formData.append('prod_qty', formData.prod_qty);
 		formDataUpload.append('prod_image', prod_image);
@@ -307,9 +309,9 @@
 			<thead class="border border-1 rounded-md">
 				<tr>
 					<th>Image</th>
-					<th>Product Name</th>
+					<th class="px-2 py-2 w-52 break-all whitespace-normal">Product Name</th>
 					<th>Categories</th>
-					<th>Description</th>
+					<th class="px-2 py-2 w-52 break-all whitespace-normal">Description</th>
 					<th>Price</th>
 					<th>Quantity</th>
 					<th>Action</th>
@@ -320,13 +322,17 @@
 					{#each products as post}
 						<tr>
 							<td><img
-								src= '/product-default.png'
-								style="width: 50px; height: 50px;"
+								src={post.prod_image
+								? `${url_API}/products/image/${post?.prod_image}`
+								: '/product-default.png'}
+								class="w-32 h-32"
 								alt=""
 							/></td>
 							<td>{post?.prod_name}</td>
 							<td>{post?.cate_name}</td>
-							<td>{post.prod_desc}</td>
+							<td data-toggle="tooltip" data-placement="top" title={post.prod_desc}>
+							{post.prod_desc.length > 100 ? post.prod_desc.substring(0, 100) + '...'
+							: post.prod_desc}</td>
 							<td>{`Rp ${Number(post.prod_price).toLocaleString('id-ID')}`}</td>
 							<td>1000</td>
 							<td>
@@ -432,7 +438,8 @@
 			<div class="grid grid-cols-1 ">
 				<div class="mb-6">
 					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description </label>
-					<textarea id="descripstion" rows="4" bind:value={formData.prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				
+					<!-- <textarea id="descripstion" rows="4" bind:value={formData.prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				 -->
+					<Ckeditor bind:notes={prod_desc}/>
 				</div>	
 			</div>
 

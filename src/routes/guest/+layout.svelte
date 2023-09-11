@@ -5,6 +5,7 @@
 
 <svelte:head>
 	<link rel="icon" type="image/x-icon" />
+	<link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </svelte:head>
 
 <body class="texture">

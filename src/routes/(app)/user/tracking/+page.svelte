@@ -2,6 +2,9 @@
     <div class="grid lg:grid-cols-3 gap-4 sm:grid-cols-1">
         <div class="lg:col-span-2 sm:col-span-1">
             <h1 class="text-xl font-belanosima d-flex justify-start mt-4">TRACKING</h1>
+            <div class="flex justify-start ">
+                <div class="border-b border-black border-1  w-28"></div>
+            </div>
             <form class="w-full max-w-sm mt-2">
                 <div class="flex items-center border-b border-black py-2">
                     <input
