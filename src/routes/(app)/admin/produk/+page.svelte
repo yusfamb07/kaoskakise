@@ -23,10 +23,8 @@
 			console.log(error);
 			await Swal.fire({
 				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
+				title: 'Oops...',
+				text: 'Something went wrong!',
 			});
 		}
 	}

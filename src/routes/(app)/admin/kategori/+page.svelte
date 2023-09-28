@@ -15,12 +15,11 @@
 			// total = res.data.pagination.totalPage;
 			console.log(categories);
 		} catch (error) {
+			console.log(error);
 			await Swal.fire({
-				imageUrl: '/log-failed.svg',
-				imageHeight: 130,
-				imageAlt: 'A tall image',
-				title: 'Oops!',
-				text: 'An error occurred while fetching data'
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Something went wrong!',
 			});
 		}
 	}
@@ -64,44 +63,45 @@
 		fetchFolder();
 	};
 
+	const handleFileChange = (event) => {
+		cate_image = event.target.files[0];
+	};
+
+
 	let cate_name = '';
 	let cate_id = '';
+	let cate_image = '';
 
-	const handleSubmit = async () => {
-		fetch(`${url_API}/categories/store`, {
-			method: 'POST',
-			body: JSON.stringify({
-				cate_name: cate_name
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${localStorage.getItem('token')}`
-			}
-		})
-			.then(async (response) => {
-				console.log(response);
-				if (response.status === 200) {
-					await Swal.fire({
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+		const formDataUpload = new FormData();
+		formDataUpload.append('cate_name', cate_name);
+		formDataUpload.append('cate_image', cate_image);
+
+		console.log(formDataUpload);
+		try {
+			
+			const response = await dataAPI.post(
+				`/categories/store`,
+				formDataUpload
+			);
+			if (response.status === 200) {
+				await Swal.fire({
 					icon: 'success',
 					title: 'Your categories has been saved',
 					showConfirmButton: false,
 					timer: 1500
 				});
 				location.reload();
-				} else {
-					bootstrap.Modal.getInstance(document.getElementById('AddModal')).hide();
-					await Swal.fire({
-						icon: 'error',
-						title: 'Oops...',
-						text: 'Something went wrong!',
-					});
-				console.log(error);
-
-				}
-			})
-			.catch((error) => {
-				console.log(error);
+			}
+		} catch (error) {
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Something went wrong!',
 			});
+			console.log(error);
+		}
 	};
 
 	let updData = {};
@@ -241,7 +241,7 @@
 		await fetchCategories();
 		// await fetchCategories();
 		// await addValue();
-		// new DataTable('#productlist', {
+		// new DataTable('#categorieslist', {
 		// 	ordering: true,
 		// 	lengthChange: true,
 		// 	searching: true,
@@ -269,12 +269,13 @@
 				</label>
 			</form>
 		</div>
-		<table id="example" class="table table-auto border border-1 mt-4 w-100 rounded-sm">
+		
+		<table id="categorieslist" class="table table-auto border border-1 mt-4 w-100 rounded-sm">
 			<thead class="border border-1 rounded-md">
 				<tr>
-					<th>No</th>
-					<th>Categories Id</th>
-					<th>Categories Name</th>
+					<th class="">No</th>
+					<th class="">Image</th>
+					<th class="">Categories Name</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -283,7 +284,13 @@
 					{#each categories as post, i}
 						<tr>
 							<td>{++i}</td>
-							<td>{post?.cate_id}</td>
+							<td><img
+								src={post.cate_image
+								? `${url_API}/products/image/${post?.cate_image}`
+								: '/product-default.png'}
+								class="w-28 h-28"
+								alt=""
+							/></td>
 							<td>{post?.cate_name}</td>
 							<td>
 								<div class="dropdown">
@@ -346,13 +353,17 @@
 			</svg>
 		</button>
       </div>
-	  <form on:submit={handleSubmit}>
+	<form on:submit={handleSubmit}>
       <div class="modal-body">
 			<div class="grid grid-cols-1 gap-4">
 				<div class="mb-6">
 					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categories Name</label>
 					<input type="text" id="product-input" placeholder="Please input your categories name" bind:value={cate_name} 												
 					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+				</div>
+				<div class="grid grid-cols-1">
+					<label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload Image Categories</label>
+					<input on:change={handleFileChange} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
 				</div>
 			</div>
 		</div>

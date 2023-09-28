@@ -28,7 +28,36 @@
 		goto('/login');
 	}
 
+	let carts = '';
+	async function countCart() {
+		const token = localStorage.getItem('token');
+
+
+		if (token) {
+			try {
+				const res = await dataAPI.get(`carts/showCarts`);
+				carts = res.data.data.result;
+				// total = res.data.pagination.totalPage;
+	
+				// console.log(carts);
+			} catch (error) {
+				console.log(error);
+				await Swal.fire({
+					icon: 'error',
+					title: 'Oops!',
+					confirmButtonColor: '#596066',
+					customClass: 'swal-height',
+					text: 'An error occurred while fetching data'
+				});
+			}
+		} else{
+			console.log('tidak ada token');
+		}
+
+	}
+
 	onMount(async () => {
+		await countCart();
 
 		// 
 	});
@@ -105,8 +134,11 @@
 									href="/user/cart"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/user/cart')}
-									>Cart</a
-								>
+									>Cart
+									<div class="absolute inline-flex items-center justify-center w-8 h-6 text-xs font-semibold text-white bg-red-500 border-2 border-gray-300  rounded-full top-2 dark:border-gray-900">
+										{carts.length}
+									</div>
+								</a>
 								<a
 									href="/user/about"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"

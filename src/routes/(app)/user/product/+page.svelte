@@ -12,7 +12,7 @@
 
 	async function getProduct() {
 		try {
-			const res = await dataAPI.get(`/products/customer/all?page=${page}&record=4`);
+			const res = await dataAPI.get(`/products/customer/all?page=${page}&record=10`);
 			products = res.data.data;;
 			total = res.data.pagination.totalPage;
 
@@ -258,13 +258,13 @@
 									<h1 class="font-semibold text-xl ">Quantity</h1>
 									<div class="flex justify-center gap-1">
 										<img on:click={increment} src="/add.svg" alt="" class="w-4 cursor-pointer" />
-										<!-- <p>
+										<p  class="text-base font-xl text-gray-900  whitespace-normal" >
 											{qty}
-										</p> -->
-										<input class="text-base font-xl text-gray-900  whitespace-normal" type="text" bind:value={qty} />										
+										</p>
 										<img on:click={decrement} src="/remove.svg" alt="" class="w-4 cursor-pointer" />
 									</div>
 									<h1 class="font-medium text-base text-gray-500 ">30 stock</h1>
+									<input type="text" bind:value={qty} class="invisible"  />										
 								</div>
 								<div class="mt-3">
 									<h1 class="font-semibold text-xl ">Description </h1>
