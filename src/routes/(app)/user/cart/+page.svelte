@@ -7,6 +7,7 @@
 	const url_API = import.meta.env.VITE_API_SOCK;
 
 	let carts = [];
+	let user_id = '';
 	let qty = ''
 	let total = '';
 	let carts_qty = [];
@@ -95,15 +96,15 @@
 	let data_payment = [];
 	let payment_id = '';
 	let sub_total_prod = '';
-	let totalAllCost;
-	let data_cart = [];
+	let totalAllCost = '';
+	let data_cart1 = [];
 
 	async function handleCheckout(event) {
 		
 		const user_id = localStorage.getItem('user_id');
 
 		const selectedValue = event.target.value;
-			formData.value = selectedValue;
+			formData.value = parseInt(selectedValue);
 
 			const selectedOption = data_ongkirs.find(option => option.value === Number(selectedValue));
 			if (selectedOption) {
@@ -112,14 +113,14 @@
 
 		try {
 			const response = await dataAPI.get(`/carts/checkout/${user_id}`);
-			data_address = response.data.data.data_address;
-			data_ongkirs = response.data.data.data_ongkirs;
-			data_payment = response.data.data.data_payment;
-			data_cart = response.data.data.data_cart;
-			sub_total_prod = response.data.data.subtotal;
+			data_address = response.data.data[0].data_address;
+			data_ongkirs = response.data.data[0].data_ongkirs;
+			data_payment = response.data.data[0].data_payment;
+			data_cart1 = response.data.data[0].data_cart;
+			sub_total_prod = response.data.data[0].subtotal;
 
 
-			const cartsWithTotalCost = data_cart.map((item) => {
+			const cartsWithTotalCost = data_cart1.map((item) => {
 			const cartQty = parseFloat(item.qty);
 			const prodPrice = parseFloat(item.price);
 			const totalCost = cartQty * prodPrice;
@@ -134,14 +135,16 @@
 			// Log the total values (you can use them as needed)
 			console.log('Total product cost:', sub_total_prod);
 			console.log('Total ongkirs value:', selectedValue);
-
-			const totalCost = parseFloat(sub_total_prod);
-			const totalOngkir = parseFloat(selectedValue);
-			const totalAllCost =  totalCost + totalOngkir;
 		
-			// console.log('Total all cost:', totalAllCost);
+
+			const totalCost = parseInt(sub_total_prod);
+			const totalOngkir = parseInt(selectedValue);
+			const totalAllCost =  parseInt(totalCost) + parseInt(totalOngkir);
+		
+			console.log('Total all cost:', totalAllCost);
 
 		} catch (error) {
+			console.log(error);
 			await Swal.fire({
 				icon: 'error',
 				title: 'Oops!',
@@ -156,6 +159,35 @@
 		const cartQty = parseFloat(data.qty);
 		const prodPrice = parseFloat(data.price);
 		return cartQty * prodPrice;
+	}
+
+	let fopa_ongkir = '';
+ 	let fopa_payment = null; // Initial value for fopa_payment
+
+	const handlePayment = async () => {
+		fetch(`${url_API}/carts/createPayment/${user_id}`, {
+			method: 'POST',
+			body: JSON.stringify({
+				fopa_ongkir: fopa_ongkir,
+				fopa_payment: fopa_payment
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.getItem('token')}`
+			}
+		})
+			.then(async (response) => {
+				console.log(response);
+				
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	};
+
+	function handleClick(paymentName) {
+		console.log('Button clicked with payment name:', paymentName);
+		fopa_payment = paymentName; // Update fopa_payment with the selected payment
 	}
 
 	let NoRekening = "7030248095";
@@ -178,6 +210,9 @@
 
 	onMount(async () => {
 		await countCart();
+ 	 	user_id = localStorage.getItem('user_id');
+		console.log(totalAllCost);
+
 		
 	});
 </script>
@@ -350,7 +385,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data_cart as data }
+						{#each data_cart1 as data }
 							<tr class="bg-white border-bottom">
 								<td class="px-2 py-2">
 									<div class="d-flex justify-items-center">
@@ -384,6 +419,7 @@
 								<td class="px-2 py-2">
 									<p class="text-base font-medium text-gray-900  whitespace-normal">
 										{`Rp ${Number(calculateTotalCostCheckout(data)).toLocaleString('id-ID')}`}
+										<!-- {data.total} -->
 									</p>
 								</td>
 
@@ -399,7 +435,7 @@
 						<h1 class="font-bold text-lg">SHIPPING SERVICE</h1>
 					</div>
 					<div>
-					<select id="countries" on:change={handleCheckout} bind:value={formData.value} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+					<select id="countries" on:change={handleCheckout} bind:value={fopa_ongkir} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
 						<option selected>Choose a service</option>
 						{#each data_ongkirs as data}
 							<option value={data?.value}>{data?.service}</option>
@@ -421,8 +457,10 @@
 					</div>
 					<div class="col-span-2 flex justify-start gap-2">
 						{#each data_payment as data }
-							<button class=" flex justify-start items-center gap-1 border-solid border-2 border-black rounded py-1 px-1">
-								<h1 class="text-sm font-semibold whitespace-normal hover:underline">{data?.payment_name}</h1>
+							<button class=" flex justify-start items-center gap-1 border-solid border-2 border-black rounded py-1 px-1" 
+							on:click={() => {
+							handleClick(data.payment_name);}}>
+								<h1 class="text-sm font-semibold whitespace-normal hover:underline" >{data?.payment_name}</h1>
 							</button>
 						{/each}
 						<!-- <button type="button" class="text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-500 mr-2 mb-2">
@@ -455,7 +493,7 @@
 					<div class="col-span-2 w-40"></div>
 					<div class="grid grid-cols-2 gap-3">
 						<h3 class="font-semibold text-base whitespace-nowrap">Total</h3>
-						<h3 class="font-semibold text-2xl text-red-400 whitespace-normal flex justify-end">{`Rp ${Number(sub_total_prod + formData?.value).toLocaleString('id-ID')}`}</h3>					
+						<h3 class="font-semibold text-2xl text-red-400 whitespace-normal flex justify-end">{totalAllCost}</h3>					
 					</div>
 				</div>
 
@@ -464,6 +502,7 @@
 					<button
 						data-bs-toggle="modal"
 						data-bs-target="#paymentModal"
+						on:click={handlePayment}
 						class=" w-full rounded-md bg-red-500 text-white font-semibold text-base h-9 mt-3 mb-3"
 						>MAKE AN ORDER</button
 					>
