@@ -6,6 +6,10 @@
 	import { dataAPI } from '../routes/utils/axios';
 
 	const url_API = import.meta.env.VITE_API_DIGITAL;
+	let user_id = '',
+		usernname = '',
+		userRoles = '',
+		user_photo = '';
 
 	function logoutHandler() {
 		localStorage.clear();
@@ -58,6 +62,13 @@
 
 	onMount(async () => {
 		await countCart();
+		user_id = localStorage.getItem('user_id');
+		usernname = localStorage.getItem('usernname');
+		userRoles = localStorage.getItem('userRoles');
+		user_photo = localStorage.getItem('user_photo');
+		console.log(user_photo);
+
+		if (!localStorage.getItem('token')) goto('/');
 
 		// 
 	});
@@ -135,7 +146,7 @@
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/user/cart')}
 									>Cart
-									<div class="absolute inline-flex items-center justify-center w-8 h-6 text-xs font-semibold text-white bg-red-500 border-2 border-gray-300  rounded-full top-2 dark:border-gray-900">
+									<div class="absolute inline-flex items-center justify-center w-8 h-6 text-xs font-semibold text-white bg-red-500 border-2 border-gray-300  rounded-full top-2 ">
 										{carts.length}
 									</div>
 								</a>
@@ -149,27 +160,35 @@
 									href="/user/tracking"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/user/tracking')}
-									>Tracking</a
+									>Orders</a
 								>
-								<div class="dropdown flex justify-center items-center ">
+								
+								<div class="dropdown flex justify-center items-center gap-2 ">
+									<img
+										class="w-7 h-7 rounded-full "
+										src={user_photo
+											? `${url_API}/auth/image/${user_photo}`
+											: 'https://flowbite.com/docs/images/people/profile-picture-5.jpg'}
+										alt=""
+									/>
+									<!-- <img
+										class="w-7 h-7 rounded-full "
+										src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+										alt="user photo"
+									/> -->
 									<button
 										type="button"
-										class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+										class="flex text-sm "
 										id="dropdownMenuButton1"
 										data-bs-toggle="dropdown"
 										aria-expanded="false"
 									>
-										<span class="sr-only">Open user menu</span>
-										<img
-											class="w-7 h-7 rounded-full "
-											src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-											alt="user photo"
-										/>
+									<p class="text-black text-base break-all whitespace-normal">{usernname}</p>
+										
 									</button>
 									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 										
 										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Edit Profile</a></li>
-										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Upload Bukti Transfer</a></li>
 										<li>
 											<a class="dropdown-item hover:bg-gray-300" href="#!" on:click={logoutHandler}
 												>Logout</a
@@ -225,7 +244,7 @@
 									href="/guest/tracking"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/guest/tracking')}
-									>Tracking</a
+									>Orders</a
 								>
 								<a
 									href="/login" 

@@ -157,7 +157,7 @@
 					</tbody>
 				</table>
 				<h1 class="font-bold text-base mt-3">Ordered Product</h1>
-				<table class="w-full rounded text-sm text-left  mt-1 border-dark border-bottom mt-1">
+				<table class="w-full rounded text-sm text-left border-dark border-bottom mt-1">
 					<thead class="text-base text-black border-dark border-bottom">
 						<tr>
 							<th scope="col" class=" px-2 py-2 font-semibold"> Product name </th>

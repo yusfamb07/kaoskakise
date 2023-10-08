@@ -28,6 +28,7 @@
 					localStorage.setItem('role', result.profile.userRoles);
 					localStorage.setItem('user_id', result.profile.user_id);
 					localStorage.setItem('usernname', result.profile.username);
+					localStorage.setItem('user_photo', result.profile.user_photo);
 
 					// console.log(result);
 					localStorage.removeItem('user');

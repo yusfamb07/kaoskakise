@@ -9,37 +9,31 @@
 </script>
 
 <div class="container" />
-<Footer footerType="logo" class="bg-gray-200 mt-5">
-	<div class="container">
-		<div class="about">
-			<div class="row">
-				<div class="col-md-6 mb-5">
-					<h1 class="text-3xl font-nats font-black leading-6 text-start">ABOUT ME</h1>
-					<p class="leading-8 font-nats font-extralight text-start mt-1">
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-						incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-						exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-						dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-						Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-						mollit anim id est laborum.
-					</p>
-				</div>
-				<div class="col-md-6" />
-			</div>
-		</div>
-		<div class="sm:flex sm:items-center sm:justify-between">
-			<FooterBrand href="https://sockenee.com" src="/logo3.png" alt="Sockenergy Logo" />
-			<FooterLinkGroup
-				ulClass="flex flex-wrap items-center mb-6 text-sm text-gray-500 sm:mb-0 dark:text-gray-400"
-			>
-				<!-- <FooterLink href="/">Home</FooterLink>
-				<FooterLink href="/">All Product</FooterLink>
-				<FooterLink href="/">Categories</FooterLink>
-				<FooterLink href="/">Cart</FooterLink>
-				<FooterLink href="/">Tracking</FooterLink>
-				<FooterLink href="/">About</FooterLink> -->
-			</FooterLinkGroup>
-			<FooterCopyright href="/" by="Sockenergy" />
-		</div>
-	</div>
-</Footer>
+
+<footer class="bg-slate-50	 shadow mt-3">
+    <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
+        <div class="sm:flex sm:items-center sm:justify-between">
+            <a href="https://flowbite.com/" class="flex items-center mb-4 sm:mb-0">
+                <img src="/logo3.png" class="h-14 mr-3" alt="Flowbite Logo" />
+            </a>
+            <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 ">
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6 ">About</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6">Privacy Policy</a>
+                </li>
+                <li>
+                    <a href="#" class="mr-4 hover:underline md:mr-6 ">Licensing</a>
+                </li>
+                <li>
+                    <a href="#" class="hover:underline">Contact</a>
+                </li>
+            </ul>
+        </div>
+        <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+        <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2023 <a href="https://flowbite.com/" class="hover:underline">Sockenergy™</a>. All Rights Reserved.</span>
+    </div>
+</footer>
+
+

@@ -333,17 +333,7 @@
 				
 				{/each}
 			</ul>
-			<!-- <div
-				class="cursor-pointer p-2 rounded-lg
-				{index === activeTabIndex ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400'}
-				"
-				on:click={() => switchTab(index)}
-			>
-				{tab.title}
-			</div> -->
-			
 		</div>
-		
 		<div id="panels">
 			{#each tabs as tab, index}
 				<div

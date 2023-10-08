@@ -118,7 +118,7 @@
 		}
 	}
 
-	let qty = 0;
+	let qty = 1;
 
 	function increment() {
 		qty += 1;

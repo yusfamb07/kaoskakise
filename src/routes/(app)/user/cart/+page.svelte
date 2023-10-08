@@ -8,20 +8,26 @@
 
 	let carts = [];
 	let user_id = '';
+	let isLoading = false;
 	let qty = ''
 	let total = '';
 	let carts_qty = [];
 	let formData = {
-		value: '',
-    	etd: ''
+		value: 0,
+    	etd: null
 	};
 
 
 	async function countCart() {
+		// isLoading = true;
+		// setTimeout(() => {
+		// 	isLoading = false;
+		// }, 1000);
 		try {
 			const res = await dataAPI.get(`carts/showCarts`);
 			carts = res.data.data.result;
 			total = res.data.data.sum;
+			console.log(carts.length);
 
 			const cartsWithTotalCost = carts.map((item) => {
 			const cartQty = parseFloat(item.cart_qty);
@@ -80,8 +86,7 @@
 					}
 				}
 			).then((res) => res.json());
-			console.log('Updated quantity for cart item:', cart.cart_id, 'New quantity:', newCartQty);
-			console.log('API response:', res.data);
+			
 			await countCart();
 			
 		} catch (error) {
@@ -95,9 +100,10 @@
 	let data_ongkirs = [];
 	let data_payment = [];
 	let payment_id = '';
-	let sub_total_prod = '';
+	let sub_total_prod = parseInt(0);
 	let totalAllCost = '';
 	let data_cart1 = [];
+	let selectedValue = 0;
 
 	async function handleCheckout(event) {
 		
@@ -133,15 +139,15 @@
 
 
 			// Log the total values (you can use them as needed)
-			console.log('Total product cost:', sub_total_prod);
-			console.log('Total ongkirs value:', selectedValue);
+			// console.log('Total product cost:', sub_total_prod);
+			// console.log('Total ongkirs value:', selectedValue);
 		
 
 			const totalCost = parseInt(sub_total_prod);
 			const totalOngkir = parseInt(selectedValue);
 			const totalAllCost =  parseInt(totalCost) + parseInt(totalOngkir);
 		
-			console.log('Total all cost:', totalAllCost);
+			// console.log('Total all cost:', totalAllCost);
 
 		} catch (error) {
 			console.log(error);
@@ -177,17 +183,38 @@
 			}
 		})
 			.then(async (response) => {
-				console.log(response);
+				// console.log(response);
 				
 			})
 			.catch((error) => {
 				console.log(error);
 			});
+		await getRekening();	
 	};
 
 	function handleClick(paymentName) {
-		console.log('Button clicked with payment name:', paymentName);
+		// console.log('Button clicked with payment name:', paymentName);
 		fopa_payment = paymentName; // Update fopa_payment with the selected payment
+	}
+
+	let rekening = '';
+
+	async function getRekening() {
+		try {
+			const res = await dataAPI.get(`/carts/formPayment/${user_id}`);
+			rekening = res.data.data.no_rek;
+
+			console.log(rekening);
+		} catch (error) {
+			console.log(error);
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops!',
+				confirmButtonColor: '#596066',
+				customClass: 'swal-height',
+				text: 'An error occurred while fetching data'
+			});
+		}
 	}
 
 	let NoRekening = "7030248095";
@@ -206,12 +233,36 @@
 		}, 1000);
 	}
 
+	 function reloadPage() {
+		location.reload();
+	}
+
+	const handleDelete = async (event) => {
+		event.preventDefault();
+		const { cartId } = event.currentTarget.dataset;
+
+		fetch(`${url_API}/carts/deleteCart/${cartId}`, {
+			method: 'DELETE',
+
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.getItem('token')}`
+			}
+		})
+			.then(async (response) => {
+				console.log(response);
+				await countCart()
+				// console.log(user_status_id);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	};
 
 
 	onMount(async () => {
 		await countCart();
  	 	user_id = localStorage.getItem('user_id');
-		console.log(totalAllCost);
 
 		
 	});
@@ -226,90 +277,92 @@
 	<div class="grid lg:grid-cols-3 sm:grid-cols-1 gap-3 mt-3">
 		<div class="lg:col-span-2 sm:col-span-1">
 			<div class="rounded shadow-md sm:rounded-lg">
-				<table class="w-full rounded text-sm text-left text-gray-500 mt-2">
-					<thead class="text-base text-black uppercase border-dark border-bottom">
+				<table class="w-full text-base text-left text-gray-600 mt-2">
+					<thead class="text-sm text-gray-800 uppercase font-bold bg-gray-100 ">
 						<tr>
-							<th scope="col" class="lg:px-6 lg:py-3 sm:px-5 sm:py-2 text-center"> Product  </th>
-							<th scope="col" class="lg:px-8 lg:py-3 sm:px-7 sm:py-2"> Price </th>
-							<th scope="col" class="px-8 py-3"> Quantity </th>
-							<th scope="col" class="lg:px-8 lg:py-1 sm:px-7 sm:py-2"> Total </th>
-							<th scope="col" class="px-3 py-3"> Action </th>
+							<th scope="col" class="px-6 py-3"><span class="sr-only">Image</span></th>
+							<th scope="col" class=" lg:px-6 lg:py-3 sm:px-5 sm:py-2"> Product  </th>
+							<th scope="col" class=" lg:px-8 lg:py-3 sm:px-7 sm:py-2"> Price </th>
+							<th scope="col" class=" px-8 py-3"> Quantity </th>
+							<th scope="col" class=" lg:px-8 lg:py-1 sm:px-7 sm:py-2"> Total </th>
+							<th scope="col" class=" px-3 py-3"> Action </th>
 						</tr>
 					</thead>
 					<tbody>
-						{#if carts}
+						{#if carts.length > 0}
 							{#each carts as cart }
 								<tr class="bg-white border-bottom">
-									<td class="px-3 py-2">
-											<div class="d-flex justify-items-center">
-												<img
-													src={cart?.cart_prod.prod_image
-													? `${url_API}/products/image/${cart?.cart_prod.prod_image}`
-													: '/product-default.png'}
-													class="lg:w-40 lg:h-40 sm:w-24 sm:h-20 px-3 py-1"
-													alt=""
-												/>
-												<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal flex items-center">
-													{cart?.cart_prod.prod_name}
-												</p>
-											</div>
+									<td class="">
+										<img
+											src={cart?.cart_prod.prod_image
+											? `${url_API}/products/image/${cart?.cart_prod.prod_image}`
+											: '/product-default.png'}
+											class="lg:w-52 lg:h-40 sm:w-24 sm:h-20 px-3 py-1"
+											alt=""
+										/>
 									</td>
-
 									<td class="px-3 py-2">
-
+										<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal flex items-center">
+											{cart?.cart_prod.prod_name}
+										</p>
+									</td>
+									<td class="px-3 py-2">
 										<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal">
 											{`Rp ${Number(cart?.cart_prod.prod_price).toLocaleString('id-ID')}`}
 										</p>
 									</td>
 									<td class="px-3 py-2">
-										<div class="flex justify-center gap-1">
-											<button on:click={() => TotalQty(true, cart)}>
-												<img src="/add.svg" alt="" class="w-4 cursor-pointer" />
-											</button>
-											<p class="text-base font-xl text-gray-900 whitespace-normal">
-											{cart.cart_qty}
-											</p>
+										<div class="flex justify-center gap-2">
 											<button on:click={() => TotalQty(false, cart)}>
 												<img src="/remove.svg" alt="" class="w-4 cursor-pointer" />
+											</button>
+											<p class="text-base font-xl text-gray-900 whitespace-normal">
+												{cart.cart_qty}
+											</p>
+											<button on:click={() => TotalQty(true, cart)}>
+												<img src="/add.svg" alt="" class="w-4 cursor-pointer" />
 											</button>
 										</div>
 									</td>
 									<td class="px-3 py-2">
-										<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal">
+										<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal font-semibold">
 											{`Rp ${Number(calculateTotalCost(cart)).toLocaleString('id-ID')}`}
 										</p>
 									</td>
 									<td class="px-3 py-2">
-										
-										<a href="#!" class="lg:text-base sm:text-sm font-medium text-red-400 dark:text-red-300 hover:underline"
+										<a href="#!" 
+										data-cart-id={cart?.cart_id}
+										on:click={handleDelete} 
+										class="lg:text-base sm:text-sm font-medium text-red-400 dark:text-red-300 hover:underline"
 											>Remove</a
 										>
 									</td>
-								</tr>
+								</tr>	
 							{/each}
 						{:else}
 							<tr>
 								<td colspan="12">
-									<div
-										class="loader-container m-0 h-100 px-3 py-3 gap-3 d-flex align-items-center justify-content-center"
-									>
-										<div class="custom-loader" />
-										<h4 class="text-black load-title text-lg">Loading....</h4>
+									<div class="flex justify-center items-center">
+										<img class="w-48 px-3 py-3" src="/empty-logo.png" alt="">
 									</div>
+									<div class="flex justify-center items-center">
+										<h4 class="text-black text-center text-base font-medium">Data cart is Empty</h4>
+									</div>
+									<div class="flex justify-center items-center mb-3">
+										<p class="text-gray-700 text-sm">Please add product to cart</p>
+									</div>
+									
 								</td>
 							</tr>
 						{/if}
-
-						
 					</tbody>
 				</table>
 			</div>
 		</div>
-		<div class=" rounded-lg bg-gray-200 max-h-44 mt-2">
-
-			<h1 class="px-6 py-3 text-base text-black uppercase font-bold">Total {carts.length} Product</h1>
+		<div class=" rounded-lg bg-gray-100 mb-2 max-h-44 mt-2">
+			<h1 class="font-semibold px-6 py-3 text-base text-black uppercase">Total {carts.length} Product</h1>
 			<hr />
-				<h1 class=" px-6 py-3 text-xl font-semibold text-gray-900  whitespace-normal">
+				<h1 class=" font-semibold px-6 py-3 text-2xl text-gray-900  whitespace-normal">
 					{`Rp ${Number(total).toLocaleString('id-ID')}`}
 				</h1>
 			<div class="container flex items-end">
@@ -338,7 +391,7 @@
 				<table class="w-full rounded  text-left mt-3">
 					<thead class="text-base text-black border-dark border-bottom" >
 						<tr>
-							<th scope="col" class="w-60 px-2 py-2 text-lg bg-white"> SHIPPING ADDRESS </th>
+							<th scope="col" class="font-semibold w-60 px-2 py-2 text-base bg-white"> SHIPPING ADDRESS </th>
 							<th scope="col" class="w-auto bg-white" />
 							<th scope="col" class="w-30 bg-white" />
 						</tr>
@@ -354,14 +407,12 @@
 										{data?.phone_number}
 									</p>
 								</td>
-								<td class="px-1 py-2">
+								<td class="px-3 py-2">
 									<div class="flex justify-center gap-1">
-										<p class="text-base font-medium text-gray-900  whitespace-normal">
-											{data?.address}
+										<p class="text-base font-medium text-gray-900 break-all">
+											{data?.address}, {data?.area}
 										</p>
-										<p class="text-base font-medium text-gray-900  whitespace-normal">
-											{data?.area}
-										</p>
+										
 									</div>
 								</td>
 								<td class="px-3 py-2">
@@ -375,48 +426,47 @@
 				</table>
 				
 					<!-- <h1 class="font-bold text-base mt-3">ORDERED PRO</h1> -->
-				<table class="w-full rounded text-sm text-left  mt-3 border-dark border-bottom">
-					<thead class="text-base text-black border-dark border-bottom">
+				<table class="w-full text-base text-left text-gray-600 mt-3">
+					<thead class="text-sm text-gray-800 uppercase font-bold bg-gray-100 ">
 						<tr>
-							<th scope="col" class=" px-2 py-2 font-semibold"> Product name </th>
-							<th scope="col" class=" px-2 py-2 font-semibold w-36 "> Price </th>
-							<th scope="col" class=" px-2 py-2 font-semibold flex justify-center"> Quantity </th>
-							<th scope="col" class=" px-2 py-2 font-semibold w-36"> Total </th>
+							<th scope="col" class="px-3 py-2"><span class="sr-only">Image</span></th>
+							<th scope="col" class=" lg:px-3 lg:py-2 sm:px-5 sm:py-2"> Product  </th>
+							<th scope="col" class=" lg:px-3 lg:py-2 sm:px-7 sm:py-2"> Price </th>
+							<th scope="col" class=" px-3 py-2"> Quantity </th>
+							<th scope="col" class=" lg:px-3 lg:py-2 sm:px-7 sm:py-2"> Total </th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each data_cart1 as data }
 							<tr class="bg-white border-bottom">
-								<td class="px-2 py-2">
-									<div class="d-flex justify-items-center">
-										<img
-												src={data?.image
-												? `${url_API}/products/image/${data?.image}`
-												: '/product-default.png'}
-												class="lg:w-44 lg:h-40 sm:w-24 sm:h-20 px-3 py-1"
-												alt=""
-											/>
-										<p class="text-base font-semibold text-gray-900  whitespace-normal flex items-center">
-											{data.name}
-										</p>
-
-										
-									</div>
+								<td class="">
+									<img
+										src={data.image
+										? `${url_API}/products/image/${data.image}`
+										: '/product-default.png'}
+										class="lg:w-52 lg:h-40 sm:w-24 sm:h-20 px-3 py-1"
+										alt=""
+									/>
+								</td>
+								<td class="px-3 py-2">
+									<p class="text-base font-semibold text-gray-900  whitespace-normal flex items-center">
+										{data.name}
+									</p>										
+									
 								</td>
 
-								<td class="px-2 py-2">
+								<td class="px-3 py-2">
 									<p class="text-base font-medium text-gray-900  whitespace-normal">
 										{`Rp ${Number(data.price).toLocaleString('id-ID')}`}
 									</p>
 								</td>
-								<td class="px-2 py-2">
-									<div class="flex justify-center gap-1">
-										<p class="text-base font-medium text-gray-900  whitespace-normal">
-											{data.qty}
-										</p>
-									</div>
+								<td class="px-3 py-2">
+									<p class="text-base font-medium text-gray-900  whitespace-normal">
+										{data.qty} x
+									</p>
+									
 								</td>
-								<td class="px-2 py-2">
+								<td class="px-3 py-2">
 									<p class="text-base font-medium text-gray-900  whitespace-normal">
 										{`Rp ${Number(calculateTotalCostCheckout(data)).toLocaleString('id-ID')}`}
 										<!-- {data.total} -->
@@ -432,10 +482,10 @@
 
 				<div class="grid grid-cols-3 gap-0 mt-3">
 					<div class="">
-						<h1 class="font-bold text-lg">SHIPPING SERVICE</h1>
+						<h1 class="font-semibold text-base">SHIPPING SERVICE</h1>
 					</div>
 					<div>
-					<select id="countries" on:change={handleCheckout} bind:value={fopa_ongkir} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+					<select id="countries" on:change={handleCheckout} bind:value={fopa_ongkir} class="bg-gray-50 border-2 border-gray-200 text-black text-sm rounded-lg focus:ring-gray-300 focus:border-gray-300 block w-80 p-2.5 ">
 						<option selected>Choose a service</option>
 						{#each data_ongkirs as data}
 							<option value={data?.value}>{data?.service}</option>
@@ -444,23 +494,24 @@
 
 					</div>
 					<div>
-						<label for="countries" class="block mb-0 text-lg ml-4 font-semibold text-black dark:text-white">{`Rp ${Number(formData?.value).toLocaleString('id-ID')}`}</label>
+						<label for="countries" class="block mb-0 text-lg ml-4 font-semibold text-black ">  {`Rp ${isNaN(formData?.value) ? '0' : Number(formData?.value).toLocaleString('id-ID')}`}</label>
 						{#if formData.etd}
-							<label for="countries" class="block mb-0 text-sm ml-4 font-medium text-black dark:text-white">Estimasi Pengiriman: {formData.etd} Hari</label>
+							<label for="countries" class="block mb-0 text-sm ml-4 font-medium text-black ">Estimasi Pengiriman: {formData.etd} Hari</label>
 						{/if}
 					</div>				
 				</div>
 
 				<div class="grid grid-cols-3 gap-0 mt-3">
 					<div class="">
-						<h1 class="font-bold text-lg">PAYMENT METHOD</h1>
+						<h1 class="font-semibold text-base">PAYMENT METHOD</h1>
 					</div>
 					<div class="col-span-2 flex justify-start gap-2">
 						{#each data_payment as data }
-							<button class=" flex justify-start items-center gap-1 border-solid border-2 border-black rounded py-1 px-1" 
-							on:click={() => {
-							handleClick(data.payment_name);}}>
-								<h1 class="text-sm font-semibold whitespace-normal hover:underline" >{data?.payment_name}</h1>
+							
+							<button class="bg-gray-50  border-2 border-gray-200  text-sm rounded-lg text-black  hover:bg-gray-200  focus:outline-none  focus:bg-gray-200 font-medium  px-4 py-1.5 text-center mr-2 mb-2 " 
+								on:click={() => {
+								handleClick(data.payment_name);}}>
+								{data?.payment_name}
 							</button>
 						{/each}
 						<!-- <button type="button" class="text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-500 mr-2 mb-2">
@@ -486,14 +537,14 @@
 					<div class="col-span-2 w-40"></div>
 					<div class="grid grid-cols-2 gap-5 border-b border-black">
 						<h3 class="font-semibold text-base whitespace-normal">Shipping Cost</h3>
-						<h3 class="font-semibold text-base whitespace-normal flex justify-end">{`Rp ${Number(formData?.value).toLocaleString('id-ID')}`}</h3>
+						<h3 class="font-semibold text-base whitespace-normal flex justify-end">  {`Rp ${isNaN(formData?.value) ? '0' : Number(formData?.value).toLocaleString('id-ID')}`}</h3>
 					</div>
 				</div>
 				<div class="grid grid-cols-3 gap-0 mt-1">
 					<div class="col-span-2 w-40"></div>
 					<div class="grid grid-cols-2 gap-3">
 						<h3 class="font-semibold text-base whitespace-nowrap">Total</h3>
-						<h3 class="font-semibold text-2xl text-red-400 whitespace-normal flex justify-end">{totalAllCost}</h3>					
+						<h3 class="font-semibold text-2xl text-red-400 whitespace-normal flex justify-end">  {`Rp ${isNaN(sub_total_prod + formData.value) ? '0' : Number(sub_total_prod + formData.value).toLocaleString('id-ID')}`}</h3>					
 					</div>
 				</div>
 
@@ -529,34 +580,38 @@
 					<div><h3  class="font-bold text-xl whitespace-normal flex justify-end">{`Rp ${Number(sub_total_prod + formData?.value).toLocaleString('id-ID')}`}</h3></div>
 				</div>
 				<hr class="mt-2" />
-				<div class="grid grid-cols-2 gap-2">
-					<div><img src="/bca.png" class="w-44" alt=""></div>
-					<div>
-						<p class="font-medium text-sm whitespace-normal mt-4">No. Rekening</p>
-						<div class="flex justify-start gap-2">
-							
-							<h3 class="font-semibold text-2xl mt-0 text-red-400 whitespace-normal">{NoRekening}</h3>
-							<h3 class="font-medium text-base mt-1 text-gray-600 whitespace-normal cursor-pointer" on:click={copyToClipboard}>SALIN</h3>
-							<br>
-						</div>
-						{#if isCopy}
-							<p class="text-xs">Teks berhasil disalin</p>
-						{/if}
-						<p class="text-sm font-bold mt-0">A.n Yusfa Muhammad Bakran</p>
+				{#if fopa_payment === 'Transfer Bank'}	
+					<div class="grid grid-cols-2 gap-2">
+							<div><img src="/bca.png" class="w-44" alt=""></div>
+							<div>
+								<p class="font-medium text-sm whitespace-normal mt-4">No. Rekening</p>
+								<div class="flex justify-start gap-2">
+									
+									<h3 class="font-semibold text-2xl mt-0 text-red-400 whitespace-normal">{rekening}</h3>
+									<!-- <h3 class="font-medium text-base mt-1 text-gray-600 whitespace-normal cursor-pointer" on:click={copyToClipboard}>SALIN</h3> -->
+									<br>
+								</div>
+								{#if isCopy}
+									<p class="text-xs">Teks berhasil disalin</p>
+								{/if}
+								<p class="text-sm font-bold mt-0">A.n Yusfa Muhammad Bakran</p>
+							</div>
+					</div>	
+				{:else}
+					<div class="flex justify-center">
+						<img src="/cod.png" class="w-40 mt-3" alt="">
 					</div>
-
-				</div>
+					<div class="flex justify-center">
+						<h3 class="font-medium text-sm mt-0 text-black whitespace-normal break-all">Your order has been processed, please prepare cash for COD payment</h3>
+					</div>
+				{/if}
 				<div class="flex justify-center">
-					<button
+					<button on:click={() => reloadPage()}
 						data-bs-dismiss="modal"
 						class=" w-72 rounded-md bg-red-500 text-white font-semibold text-base h-9 mt-3 mb-3 "
-						>OK</button
-					>
+						>OK
+					</button>
 				</div>
-
-				
-
-
 			</div>
 		</div>
 	</div>
