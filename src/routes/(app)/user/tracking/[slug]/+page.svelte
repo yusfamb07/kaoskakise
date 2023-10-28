@@ -6,6 +6,7 @@
 	const url_API = import.meta.env.VITE_API_SOCK;
     import { page } from '$app/stores';
     let slug = $page.params.slug;
+    
 
     let activeTabIndex = 0;
 
@@ -31,108 +32,170 @@
            
 		]}
 	];
+    
+    let order_number = '';
+    let name_product = '';
+    let qty_product = '';
+    let img_product = '';
+    let price_product = '';
+    let subtotal_product = '';
+    let shipping_cost = '';
+    let status_payment = '';
+    let payment_method = '';
+    let total_all = '';
+    async function detailOrder() {
+
+		try {
+			const res = await dataAPI.get(`carts/detailPayment/${slug}`);
+			name_product = res.data.data.data_product.name;
+			qty_product = res.data.data.data_product.qty;
+			img_product = res.data.data.data_product.image;
+			price_product = res.data.data.data_product.price;
+			subtotal_product = res.data.data.data_product.total;
+
+			shipping_cost = res.data.data.data_payment.ongkir;
+			status_payment = res.data.data.data_payment.status;
+			order_number = res.data.data.data_payment.order_number;
+			total_all = res.data.data.data_payment.totalAll;
+			payment_method = res.data.data.data_payment.payment_method;
+            console.log(img_product);
+            
+		} catch (error) {
+			console.log(error);
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops!',
+				confirmButtonColor: '#596066',
+				customClass: 'swal-height',
+				text: 'An error occurred while fetching data'
+			});
+		}
+	}
 
 	function switchTab(index) {
 		activeTabIndex = index;
 	}
 
+    onMount(async () => {
+        await detailOrder()
+
+	});
 
 
 </script>
 <div class="container">
-    <h1 class="text-xl font-belanosima flex justify-center mt-4">ORDERS DETAIL</h1>
-        <div class="flex justify-center ">
+    <div class="flex justify-between mt-3">
+        <a href="/user/tracking"  class="text-white bg-black hover:bg-black focus:ring-3 focus:outline-none focus:ring-black font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2">
+            <img src="/backarrow.png" class="w-4 h-3" alt="">
+            <span class="sr-only">Icon description</span>
+        </a>
+        <div>
+            <h1 class="text-xl font-belanosima flex justify-center">ORDERS DETAIL</h1>
             <div class="border-b border-black border-1  w-40"></div>
         </div>
+            <div class="flex justify-center ">
+            </div>
+    </div>
+    
     <div class="grid lg:grid-cols-3 gap-4 sm:grid-cols-1">
         <div class="lg:col-span-2 sm:col-span-1">
-            <div class="flex items-stretch mt-4 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Order ID </p>
+                <div class="flex items-stretch mt-4 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Order ID </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">SE00122393</div>
                 </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Product Name </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5 flex items-start">
+                        <!-- <img src="/active.jpg" class="w-20 h-20" alt=""> -->
+                        <img src="{img_product
+                            ? `${url_API}/products/image/${img_product}`
+                            : '/product-default.png'}" class="w-32" alt="">
+                        <p class="text-base font-semibold">{name_product} <br> <span class="font-medium">{qty_product} x</span> </p>
+                        
+                    </div>
                 </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">SE00122393</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Product Name </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Categories </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">Old School</div>
                 </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Price </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">{`Rp ${Number(price_product).toLocaleString('id-ID')}`}</div>
                 </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5 flex items-start">
-                    <img src="/active.jpg" class="w-20 h-20" alt="">
-                    <p class="text-base font-medium">Kaos Kaki Old School Active V.2 <br>x1</p>
-                    
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Subtotal Product </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">{`Rp ${Number(subtotal_product).toLocaleString('id-ID')}`}</div>
                 </div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Categories </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Shipping Cost </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">{`Rp ${Number(shipping_cost).toLocaleString('id-ID')}`}</div>
                 </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Total </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5 font-semibold text-red-500 text-xl">{`Rp ${Number(total_all).toLocaleString('id-ID')}`}</div>
                 </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">Old School</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Price </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Payment Method </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">
+                        <div class="w-full flex items-center">
+                            <img src={payment_method === 'Transfer Bank'
+                                ? '/bca.png'
+                                : '/cod.png'} class="w-24 " alt="">
+                            <p class="text-base font-medium">{payment_method}</p>
+                        </div>    
+                    </div>
                 </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
+                <div class="flex items-stretch mt-2 px-4">
+                    <div class="border-b border-gray-300 py-2 w-50">                        
+                        <p class="text-base font-semibold">Status </p>
+                    </div>
+                    <div class="ml-24 py-2">                        
+                        <p class="text-sm font-semibold">: </p>
+                    </div>
+                    <div class="border-b border-gray-300 py-2 w-full ml-5">
+                         <p class="font-semibold uppercase text-red-500">{status_payment}</p>
+                    </div>
                 </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">Rp 12.000,00</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Subtotal Product </p>
-                </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
-                </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">Rp 24.000,00</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Shipping Cost </p>
-                </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
-                </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">Rp 8.000,00</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Total </p>
-                </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
-                </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5 font-bold">Rp 32.000,00</div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Payment Method </p>
-                </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
-                </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5"><img src="/cod.png" class=" w-14 "  alt=""></div>
-            </div>
-            <div class="flex items-stretch mt-2 px-4">
-                <div class="border-b border-gray-300 py-2 w-50">                        
-                    <p class="text-base font-semibold">Status </p>
-                </div>
-                <div class="ml-24 py-2">                        
-                    <p class="text-sm font-semibold">: </p>
-                </div>
-                <div class="border-b border-gray-300 py-2 w-full ml-5">
-                    <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span>
-                </div>
-            </div>
         </div>
         
         <div>

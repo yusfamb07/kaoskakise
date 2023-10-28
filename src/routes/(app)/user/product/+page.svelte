@@ -177,6 +177,8 @@
 		</div>
 	</div>
 
+	
+
 	{#if products}
 	<div class="grid lg:grid-cols-4 sm:grid-cols-2 gap-5 mt-4">
 		{#each products as post }
@@ -190,7 +192,7 @@
 					src={post.prod_image
 					? `${url_API}/products/image/${post?.prod_image}`
 					: '/product-default.png'}
-					class="card-img-top "
+					class="w-80 h-72"
 					alt=""
 				/>
 				<!-- <img src="/product.png" class="card-img-top " alt="..." /> -->
