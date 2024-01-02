@@ -10,7 +10,7 @@
 	let total;
 	async function fetchCategories() {
 		try {
-			const res = await dataAPI.get(`/categories`);
+			const res = await dataAPI.get(`/categories/admin/all?page=${page}&record=10`);
 			categories = res.data.data;
 			// total = res.data.pagination.totalPage;
 			console.log(categories);
@@ -28,15 +28,15 @@
 	let search = [];
 
 	async function searchCategories() {
-		folder = null;
+		categories = null;
 
-		try {
+		try { 
 			const res = await fetch(
-				`${url_API}/backend/api/group/tata_usaha/search?page=${page}&record=10`,
+				`${url_API}/categories/admin/searchCategories/?page=${page}&record=10`,
 				{
 					method: 'POST',
 					body: JSON.stringify({
-						group_name: `%${search}%`
+						search: `%${search}%`
 					}),
 
 					headers: {
@@ -45,7 +45,7 @@
 					}
 				}
 			).then((res) => res.json());
-			folder = res.data;
+			categories = res.data;
 			total = res.pagination.totalPage;
 		} catch (error) {
 			console.log(error);
@@ -70,13 +70,13 @@
 
 	let cate_name = '';
 	let cate_id = '';
-	let cate_image = '';
+	let cate_image = [];
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
 		const formDataUpload = new FormData();
 		formDataUpload.append('cate_name', cate_name);
-		formDataUpload.append('cate_image', cate_image);
+		formDataUpload.append('cate_image', cate_image.files[0]);
 
 		console.log(formDataUpload);
 		try {
@@ -107,85 +107,108 @@
 	let updData = {};
 
 	async function handleUpdateData(e) {
-		const { groupId } = e.currentTarget.dataset;
-		// let dateInmail = moment(updData.inmail_date * 100).format('MMM Do YY');
+		const { cateId } = e.currentTarget.dataset;
 		try {
-			const response = await dataAPI.get(`/backend/api/group/tata_usaha/${groupId}`);
-			updData = response.data[0];
-			// console.log(updData);
+			const response = await dataAPI.get(`/categories/admin/${cateId}`);
+			updData = response.data.data[0];
 			cate_id = updData.cate_id;
-			group_name = updData.group_name;
+			cate_name = updData.cate_name;
+			cate_image = updData.cate_image;
 		} catch (error) {
-			bootstrap.Modal.getInstance(document.getElementById('EditModal')).hide();
 			await Swal.fire({
-				html: `
-				<div class="d-flex align-items-center justify-content-center flex-column h-100">
-					<img src="/log-failed.svg" width="150" height="150" />
-					<h4 class="mb-0 mt-3 fw-semibold text-white">Oops!</h4>	
-					<p class="mb-0 mt-2 fw-medium text-secondary">An error occurred while fetching data</p>
-				</div>
-			`,
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height'
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Something went wrong!',
 			});
+			console.log(error);
 		}
 	}
 
+	let cate_image_update = [];
+
 	const updateData = async (event) => {
 		event.preventDefault();
-		const { groupId } = event.currentTarget.dataset;
 
-		fetch(`${url_API}/backend/api/group/tata_usaha/${groupId}`, {
-			method: 'PUT',
-			body: JSON.stringify({
-				group_name: group_name
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${localStorage.getItem('token')}`
-			}
-		})
-			.then(async (response) => {
-				console.log(response);
+		if (cate_image_update.files[0]) {
+			const formDataWithFile = new FormData();
+			formDataWithFile.append('cate_name', cate_name);
+			formDataWithFile.append('cate_image', cate_image_update.files[0]);
+
+			const { cateId } = event.currentTarget.dataset;
+
+			try {
+				const response = await dataAPI.post(
+					`/categories/edit/${cateId}`,
+					formDataWithFile
+				);
+
 				if (response.status === 200) {
-					bootstrap.Modal.getInstance(document.getElementById('EditModal')).hide();
 					await Swal.fire({
-						html: `
-				<div class="d-flex align-items-center justify-content-center flex-column h-100">
-					<img src="/log-success.svg" width="150" height="150" />
-					<h4 class="mb-0 mt-3 fw-semibold text-white">Create Folder successfully!</h4>
-				</div>
-			`,
-						confirmButtonColor: '#596066',
-						customClass: 'swal-height'
-					});
-
-					await searchFolder();
+					icon: 'success',
+					title: 'Your categories has been saved',
+					showConfirmButton: false,
+					timer: 1500
+				});
+				location.reload();
 				} else {
-					bootstrap.Modal.getInstance(document.getElementById('EditModal')).hide();
 					await Swal.fire({
-						html: `
-				<div class="d-flex align-items-center justify-content-center flex-column h-100">
-					<img src="/log-failed.svg" width="150" height="150" />
-					<h4 class="mb-0 mt-3 fw-semibold text-white">Oops!</h4>
-					<p class="mb-0 mt-2 fw-medium text-secondary">An error occurred while saving data</p>
-				</div>
-			`,
-						confirmButtonColor: '#596066',
-						customClass: 'swal-height'
+						icon: 'error',
+						title: 'Oops...',
+						text: 'Something went wrong!',
 					});
+					console.log(error);
+				}
+			} catch (error) {
+				await Swal.fire({
+					icon: 'error',
+					title: 'Oops...',
+					text: 'Something went wrong!',
+				});
+				console.log(error);
+				}
+		} else {
+			const { cateId } = event.currentTarget.dataset;
+
+			fetch(`${url_API}/categories/admin/editNoImage/${cateId}`, {
+				method: 'POST',
+				body: JSON.stringify({
+					cate_name: cate_name
+				}),
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${localStorage.getItem('token')}`
 				}
 			})
-			.catch((error) => {
-				console.log(error);
-			});
+				.then(async (response) => {
+					console.log(response);
+					if (response.status === 200) {
+						await Swal.fire({
+							icon: 'success',
+							title: 'Your categories has been saved',
+							showConfirmButton: false,
+							timer: 1500
+						});
+					location.reload();
+					} else {
+						await Swal.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Something went wrong!',
+						});
+						console.log(error);
+					}
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+		}
 	};
 
 	const handleDelete = async (event) => {
 		event.preventDefault();
-		const { groupId } = event.currentTarget.dataset;
+		const { cateId } = event.currentTarget.dataset;
 
-		fetch(`${url_API}/backend/api/group/tata_usaha/${groupId}`, {
+		fetch(`${url_API}/categories/admin/${cateId}`, {
 			method: 'GET',
 
 			headers: {
@@ -207,7 +230,7 @@
 						confirmButtonText: 'Yes, delete it!'
 					}).then((result) => {
 						if (result.isConfirmed) {
-							fetch(`${url_API}/backend/api/group/tata_usaha/${groupId}`, {
+							fetch(`${url_API}/categories/delete/${cateId}`, {
 								method: 'DELETE',
 
 								headers: {
@@ -215,20 +238,14 @@
 									Authorization: `Bearer ${localStorage.getItem('token')}`
 								}
 							});
-							Swal.fire({
-								html: `
-					<div class="d-flex align-items-center justify-content-center flex-column h-100">
-					<img src="/log-success.svg" width="150" height="150" />
-					<h4 class="mb-0 mt-3 fw-semibold text-white">Your folder has been delete</h4>
-				</div>
-				`,
-								confirmButtonColor: '#596066',
-								customClass: 'swal-height'
-							});
+						Swal.fire({
+							icon: 'success',
+							title: 'Your categories has been saved',
+							showConfirmButton: false,
+							timer: 1500
+						});
 						}
 					});
-					await fetchFolder();
-
 					// location.reload();
 				}
 			})
@@ -237,6 +254,7 @@
 			});
 	};
 
+	
 	onMount(async () => {
 		await fetchCategories();
 		// await fetchCategories();
@@ -303,14 +321,14 @@
 									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 										<li>
 											<a class="dropdown-item hover:bg-gray-300" href="#!" data-bs-toggle="modal" data-bs-target="#EditModal"
-												data-prod-id={post?.prod_id}
+												data-cate-id={post?.cate_id}
 												on:click={handleUpdateData}
 												><h1 class="text-black text-md font-medium">
 													Edit
 												</h1></a
 											>
 										</li>
-										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Delete</a></li>
+										<!-- <li><a class="dropdown-item hover:bg-gray-300" href="#!" data-cate-id={post?.cate_id} on:click={handleDelete}>Delete</a></li> -->
 										
 									</ul>
 								</div>
@@ -363,13 +381,48 @@
 				</div>
 				<div class="grid grid-cols-1">
 					<label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload Image Categories</label>
-					<input on:change={handleFileChange} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
+					<input bind:this={cate_image} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
 				</div>
 			</div>
 		</div>
 		<div class="modal-footer">
 			<button data-bs-dismiss="modal" aria-label="Close" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-md text-sm px-3 py-2 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" >Cancel</button>
 			<button type="submit" class="focus:outline-none text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-md text-sm px-3 py-2 mr-2 mb-2 dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-900" >Save Categories</button>
+		</div>
+	</form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="EditModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-bold" id="exampleModalLabel">Edit Categories</h5>
+		<button type="button" data-bs-dismiss="modal" aria-label="Close" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+			<span class="sr-only">Close menu</span>
+				<svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>
+      </div>
+	<form>
+      <div class="modal-body">
+			<div class="grid grid-cols-1 gap-4">
+				<div class="mb-6">
+					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Categories Name</label>
+					<input type="text" id="product-input" placeholder="Please input your categories name" bind:value={cate_name} 												
+					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+				</div>
+				<div class="grid grid-cols-1">
+					<label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="default_size">Upload Image Categories</label>
+					<input bind:this={cate_image_update} class="block w-full mb-5 text-md px-2 py-1 text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="default_size" type="file">
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button data-bs-dismiss="modal" aria-label="Close" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-md text-sm px-3 py-2 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" >Cancel</button>
+			<button type="submit" data-cate-id={cate_id} on:click={updateData} class="focus:outline-none text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-md text-sm px-3 py-2 mr-2 mb-2 dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-900" >Update Categories</button>
 		</div>
 	</form>
     </div>

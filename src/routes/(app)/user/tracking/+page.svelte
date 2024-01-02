@@ -343,23 +343,23 @@
                                                 <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
                                             </div>
                                         </div>
-                                            <div class="grid grid-cols-9 mt-3">
-                                                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                                <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                                <div class="col-span-8 border-b border-gray-300 cursor-pointer" on:click={() => handleRowClick(item)} >
-                                                    <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                                                        <div class=" py-2 w-full ml-5 flex items-start">
-                                                        {@html item?.image}
-                                                                <div>
-                                                                    <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
-                                                                </div>
-                                                        </div>
+                                        <div class="grid grid-cols-9 mt-3">
+                                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                            <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                            <div class="col-span-8 border-b border-gray-300 cursor-pointer" on:click={() => handleRowClick(item)} >
+                                                <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                    <div class=" py-2 w-full ml-5 flex items-start">
+                                                    {@html item?.image}
+                                                            <div>
+                                                                <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                            </div>
                                                     </div>
                                                 </div>
-                                                <div class="border-b border-gray-300">
-                                                    <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
-                                                </div>
                                             </div>
+                                            <div class="border-b border-gray-300">
+                                                <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                            </div>
+                                        </div>
                                         <div class="grid grid-cols-9 mt-3">
                                             <div class="col-span-7">
                                                 <div class="flex items-center">
