@@ -488,7 +488,9 @@
 					<select id="countries" on:change={handleCheckout} bind:value={fopa_ongkir} class="bg-gray-50 border-2 border-gray-200 text-black text-sm rounded-lg focus:ring-gray-300 focus:border-gray-300 block w-80 p-2.5 ">
 						<option selected>Choose a service</option>
 						{#each data_ongkirs as data}
-							<option value={data?.value}>{data?.service}</option>
+							<option value={data?.value}>{data?.description}
+							 - <span>{data?.etd} days</span>
+							</option>
 						{/each}
 					</select>
 

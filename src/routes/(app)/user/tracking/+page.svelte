@@ -9,6 +9,7 @@
 
 
     let unpayment = [];
+    let products = [];
  
     let orderId = '';
 
@@ -17,6 +18,7 @@
 		try {
 			const res = await dataAPI.get(`carts/listUnpayment`);
 			unpayment = res.data.data;
+			products = res.data.data[0].products;
 
             tabs[0].content = unpayment.map(item => ({
                 id_order: item.id,  
@@ -34,9 +36,8 @@
                 subtotal: `Rp ${Number(item.total).toLocaleString('id-ID')}`,
                 total: `Rp ${Number(item.totalAll).toLocaleString('id-ID')}`,
                 qty: item.qty,
-                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.subtotal)),
+                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.totalAll)),
                 shipping_cost : parseFloat(item.ongkir),
-                totalFloat : parseFloat(item.total),
                 payment: item.payment, 
                 action: `
                     <button
@@ -49,9 +50,20 @@
                         Upload Evidence
                     </button>
                 `
-                
             }));
-            // console.log(unpayment.total_price);
+
+            tabs[0].prod = products.map(item => ({
+                fopa_id: item.fopa_id,
+                image: `<img src="${item.image
+                        ? `${url_API}/products/image/${item.image}`
+                        : '/product-default.png'}" class="w-44" alt="">`,
+                name_product: item.name,
+                end_date: item.end_date,
+                price: `Rp ${Number(item.prod_price).toLocaleString('id-ID')}`,
+                subtotal: `Rp ${Number(item.total).toLocaleString('id-ID')}`,
+                qty: item.qty,
+                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.subtotal)), 
+            }));
 		} catch (error) {
 			console.log(error);
 			await Swal.fire({
@@ -132,12 +144,28 @@
 		}
 	}
 
-    let files;
+    let image_transaction = [];
+
+    function handleDragOver(event) {
+        event.preventDefault();
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        image_transaction = event.dataTransfer.files;        
+        
+    }
+
+    function handleDropzone(event) {
+        event.preventDefault();
+        image_transaction = event.target.files;
+
+    }
 
 	const submitTransfer = async (event) => {
 		event.preventDefault();
 		const formDataWithFile = new FormData();
-		formDataWithFile.append('fopa_image_transaction', files[0]);
+		formDataWithFile.append('fopa_image_transaction', image_transaction[0]);
         console.log(formDataWithFile);
 		try {
 			const response = await dataAPI.post(`/carts/upload_bukti/${orderId}`, formDataWithFile);
@@ -232,30 +260,16 @@
     let activeTabIndex = 0;
 
 	const tabs = [
-		// { icon: `<img src="/all.svg" class="w-6 h-6 mr-3" alt="">`, 
-		// title: 'Order All', content: [
-          
-		// ]},
         { icon: `<img src="/unpaid.png" class="w-6 h-6 mr-3" alt="">`,  
-		title: 'Unpayment', content: [
-           
-		]},
+		title: 'Unpayment', content: [], prod : []},
 		{ icon: `<img src="/rupiah.png" class="w-6 h-6 mr-3" alt="">`,  
-		title: 'Payment', content: [
-           
-		]},
+		title: 'Payment', content: [],  prod : []},
 		{ icon: `<img src="/fast-delivery.png" class="w-6 h-6 mr-3" alt="">`,  
-		title: 'Delivery', content: [
-            
-		]},
+		title: 'Delivery', content: [],  prod : []},
         { icon: `<img src="/done.png" class="w-6 h-6 mr-3" alt="">`,  
-		title: 'Done', content: [
-            
-		]},
+		title: 'Done', content: [],  prod : []},
 		{ icon: `<img src="/cancelled.png" class="w-6 h-6 mr-3" alt="">`,  
-		title: 'Cancelled', content: [
-           
-		]}
+		title: 'Cancelled', content: [],  prod : []}
 	];
 
 	function switchTab(index) {
@@ -263,7 +277,7 @@
 	}
 
     function handleRowClick(item) {
-        goto(`/user/tracking/${item.id_order}`);
+        goto(`/user/tracking/${item.fopa_id}`);
     }
 
     function handleRowClickPayment(item) {
@@ -333,7 +347,9 @@
                         {#if tab.content.length > 0}
                         {#if tab.title === "Unpayment"}    
                             {#each tab.content as item}
-                                    <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow ">
+                                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow  mt-3" >
                                         <div class="grid grid-cols-9 mt-3">
                                             <div class="col-span-8 border-b border-gray-300">
                                                 <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
@@ -343,23 +359,25 @@
                                                 <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
                                             </div>
                                         </div>
-                                        <div class="grid grid-cols-9 mt-3">
-                                            <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                            <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                            <div class="col-span-8 border-b border-gray-300 cursor-pointer" on:click={() => handleRowClick(item)} >
-                                                <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                                                    <div class=" py-2 w-full ml-5 flex items-start">
-                                                    {@html item?.image}
-                                                            <div>
-                                                                <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
-                                                            </div>
+                                        {#each tab.prod as item }    
+                                            <div class="grid grid-cols-9 mt-3">
+                                                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                                <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                                <div class="col-span-8 border-b border-gray-300 cursor-pointer" on:click={() => handleRowClick(item)} >
+                                                    <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                        <div class=" py-2 w-full ml-5 flex items-start">
+                                                        {@html item?.image}
+                                                                <div>
+                                                                    <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                                </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div class="border-b border-gray-300">
+                                                    <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                                </div>
                                             </div>
-                                            <div class="border-b border-gray-300">
-                                                <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
-                                            </div>
-                                        </div>
+                                        {/each}
                                         <div class="grid grid-cols-9 mt-3">
                                             <div class="col-span-7">
                                                 <div class="flex items-center">
@@ -382,23 +400,25 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="flex">
-                                                    <div class="flex-none w-32">
-                                                        <div class="py-2 w-full flex items-start">
-                                                            <p class="text-base font-medium">Rekening Number</p>
+                                                {#if item.payment_method === 'Transfer Bank'}                  
+                                                    <div class="flex">
+                                                        <div class="flex-none w-32">
+                                                            <div class="py-2 w-full flex items-start">
+                                                                <p class="text-base font-medium">Rekening Number</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-initial w-5">
+                                                            <div class="py-2 mt-1">                        
+                                                                <p class="text-sm font-semibold">: </p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-initial w-80">
+                                                            <div class="py-2 w-full ml-5 flex items-start">
+                                                                <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? 'A/n Yusfa Muhammad Bakran': '' } </span></p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="flex-initial w-5">
-                                                        <div class="py-2 mt-1">                        
-                                                            <p class="text-sm font-semibold">: </p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-initial w-80">
-                                                        <div class="py-2 w-full ml-5 flex items-start">
-                                                            <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? 'A/n Yusfa Muhammad Bakran': '' } </span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                {/if}
                                             </div>
                                             <div class="col-span-2">
                                                 <div class="flex">
@@ -431,7 +451,7 @@
                                                     </div>
                                                     <div class="flex-initial w-32">
                                                         <div class="py-2 w-full ml-5 flex items-start">
-                                                            <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.totalFloat + item.shipping_cost)).toLocaleString('id-ID')}`}</p>
+                                                            <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -576,7 +596,35 @@
                 <div class="modal-body">
                    <div class="container">
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="user_avatar">Upload file</label>
-                        <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 " type="file"  bind:files>
+                        <!-- <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 " type="file"  bind:files> -->
+                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                        <div class="flex items-center justify-center w-full" 
+                            on:dragover={handleDragOver}
+                            on:drop={handleDrop}
+                            on:change={handleDropzone}
+                        >
+                            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                                    </svg>
+                                    {#if !image_transaction || image_transaction.length < 1}
+                                        
+                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+
+                                        {:else}
+
+                                        {#each image_transaction as image }
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">{image.name}</p>
+                                            
+                                        {/each}
+                                    {/if}
+                                </div>
+                                
+                                <input id="dropzone-file" type="file" class="hidden" />
+                            </label>
+                        </div> 
                    </div>
                    
                     <div class="flex justify-center">
