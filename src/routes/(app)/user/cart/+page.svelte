@@ -14,7 +14,8 @@
 	let carts_qty = [];
 	let formData = {
 		value: 0,
-    	etd: null
+    	etd: null,
+		description : null
 	};
 
 
@@ -71,6 +72,10 @@
 		
 		cart.cart_qty = newCartQty;
 
+		if (newCartQty === 0) {
+			handleDelete 
+		}
+
 		try {
 			const res = await fetch(
 				`${url_API}/carts/updateCart/${cart.cart_id}`,
@@ -103,20 +108,21 @@
 	let sub_total_prod = parseInt(0);
 	let totalAllCost = '';
 	let data_cart1 = [];
-	let selectedValue = 0;
+	let selectedValue = '';
 
 	async function handleCheckout(event) {
 		
 		const user_id = localStorage.getItem('user_id');
-
-		const selectedValue = event.target.value;
+		const selectedValue = event.target.value.split(',');
+		console.log(selectedValue[1]);
 			formData.value = parseInt(selectedValue);
 
-			const selectedOption = data_ongkirs.find(option => option.value === Number(selectedValue));
+			const selectedOption = data_ongkirs.find(option => option.value === Number(selectedValue[0]));
 			if (selectedOption) {
 				formData.etd = selectedOption.etd;
+				formData.description = selectedOption.description;
+				console.log(formData.description);
 			}
-
 		try {
 			const response = await dataAPI.get(`/carts/checkout/${user_id}`);
 			data_address = response.data.data[0].data_address;
@@ -124,30 +130,6 @@
 			data_payment = response.data.data[0].data_payment;
 			data_cart1 = response.data.data[0].data_cart;
 			sub_total_prod = response.data.data[0].subtotal;
-
-
-			const cartsWithTotalCost = data_cart1.map((item) => {
-			const cartQty = parseFloat(item.qty);
-			const prodPrice = parseFloat(item.price);
-			const totalCost = cartQty * prodPrice;
-				
-				return {
-					...item,
-					totalCost: totalCost
-				};
-			});
-
-
-			// Log the total values (you can use them as needed)
-			// console.log('Total product cost:', sub_total_prod);
-			// console.log('Total ongkirs value:', selectedValue);
-		
-
-			const totalCost = parseInt(sub_total_prod);
-			const totalOngkir = parseInt(selectedValue);
-			const totalAllCost =  parseInt(totalCost) + parseInt(totalOngkir);
-		
-			// console.log('Total all cost:', totalAllCost);
 
 		} catch (error) {
 			console.log(error);
@@ -174,8 +156,10 @@
 		fetch(`${url_API}/carts/createPayment/${user_id}`, {
 			method: 'POST',
 			body: JSON.stringify({
-				fopa_ongkir: fopa_ongkir,
-				fopa_payment: fopa_payment
+				fopa_ongkir: formData.value,
+				fopa_payment: fopa_payment,
+				fopa_etd_ongkir: formData.etd,
+				fopa_desc_ongkir: formData.description,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -325,7 +309,7 @@
 										</div>
 									</td>
 									<td class="px-3 py-2">
-										<p class="lg:text-base sm:text-sm font-medium text-gray-900  whitespace-normal font-semibold">
+										<p class="lg:text-base sm:text-sm  text-gray-900  whitespace-normal font-semibold">
 											{`Rp ${Number(calculateTotalCost(cart)).toLocaleString('id-ID')}`}
 										</p>
 									</td>
@@ -485,10 +469,10 @@
 						<h1 class="font-semibold text-base">SHIPPING SERVICE</h1>
 					</div>
 					<div>
-					<select id="countries" on:change={handleCheckout} bind:value={fopa_ongkir} class="bg-gray-50 border-2 border-gray-200 text-black text-sm rounded-lg focus:ring-gray-300 focus:border-gray-300 block w-80 p-2.5 ">
+					<select id="countries" on:change={handleCheckout} bind:value={selectedValue} class="bg-gray-50 border-2 border-gray-200 text-black text-sm rounded-lg focus:ring-gray-300 focus:border-gray-300 block w-80 p-2.5 ">
 						<option selected>Choose a service</option>
 						{#each data_ongkirs as data}
-							<option value={data?.value}>{data?.description}
+							<option value={`${data.value},${data.description},${data.etd}`}>{data?.description}
 							 - <span>{data?.etd} days</span>
 							</option>
 						{/each}

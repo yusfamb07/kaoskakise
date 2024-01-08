@@ -16,7 +16,6 @@
 			orders = res.data.data;
 			total = res.data.pagination.totalPage;
 
-			// console.log(orders);
 			
 		} catch (error) {
 			console.log(error);
@@ -99,6 +98,7 @@
 			const response = await dataAPI.get(`/orders/admin/detailOrders/${id}`);
 			detailProduct = response.data.data.products;
 			detailOrders = response.data.data;
+			order_id = detailOrders.id; 
 			qty = detailProduct.cart_qty;
 			prod_name = detailProduct.prod_name;
 			prod_image = detailProduct.prod_image;
@@ -125,6 +125,51 @@
 		}
 	}
 
+	let fopa_number_resi = '';
+	let order_id = '';
+
+	const addReceiptNumber = async (event) => {
+		event.preventDefault();
+		const { orderId } = event.currentTarget.dataset;
+		console.log(event.currentTarget);
+
+		fetch(`${url_API}/orders/admin/updateOrders/${orderId}`, {
+			method: 'POST',
+			body: JSON.stringify({
+				fopa_number_resi: fopa_number_resi
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${localStorage.getItem('token')}`
+			}
+		})
+			.then(async (response) => {
+				console.log(response);
+				if (response.status === 200) {
+					bootstrap.Modal.getInstance(document.getElementById('receiptNumber')).hide();
+					await Swal.fire({
+						icon: 'success',
+						title: 'Your order has been entered with a receipt number',
+						showConfirmButton: false,
+						timer: 1500
+					});
+
+					await getProduct();
+				} else {
+					bootstrap.Modal.getInstance(document.getElementById('receiptNumber')).hide();
+					await Swal.fire({
+						icon: 'error',
+						title: 'Oops!',
+						confirmButtonColor: '#596066',
+						customClass: 'swal-height',
+						text: 'An error occurred while fetching data'
+					});
+				}
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	};
 
 	onMount(async () => {
 		await getProduct();
@@ -192,7 +237,7 @@
 												<div class="flex items-center">
 													<div class="flex-none w-32">
 														<div class=" w-full flex items-center">
-															<p class="text-base font-semibold">Nama</p>
+															<p class="text-base font-semibold">Name</p>
 														</div>
 													</div>
 													<div class="flex-initial w-5">
@@ -209,7 +254,7 @@
 												<div class="flex items-center">
 													<div class="flex-none w-32">
 														<div class=" w-full flex items-center">
-															<p class="text-base font-semibold">Alamat</p>
+															<p class="text-base font-semibold">Address</p>
 														</div>
 													</div>
 													<div class="flex-initial w-5">
@@ -239,7 +284,7 @@
 															src={detail.image
 															? `${url_API}/products/image/${detail.image}`
 															: '/product-default.png'}
-															class="w-24"
+															class="w-36"
 															alt=""
 														/>
 														<div>
@@ -337,6 +382,16 @@
 														</div>
 													</div>
 												</div>
+												<div class="flex">
+													<button
+														data-bs-toggle="modal"
+														data-bs-target="#receiptNumber"
+														on:click={() => toggleAccordion(post.id)}
+														class="w-40 rounded-md bg-red-500 text-white font-semibold text-sm p-2 mt-2 mb-3"
+													>
+														Add Receipt Number
+													</button>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -345,16 +400,16 @@
 						</tr>
 					{/each}
 				{:else}
-				<tr>
-					<td colspan="12">
-						<div
-							class="loader-container m-0 h-100 gap-3 d-flex align-items-center justify-content-center"
-						>
-							<div class="custom-loader" />
-							<h4 class="text-black load-title">Loading....</h4>
-						</div>
-					</td>
-				</tr>
+					<tr>
+						<td colspan="12">
+							<div
+								class="loader-container m-0 h-100 gap-3 d-flex align-items-center justify-content-center"
+							>
+								<div class="custom-loader" />
+								<h4 class="text-black load-title">Loading....</h4>
+							</div>
+						</td>
+					</tr>
 				{/if}
 			</tbody>
 		</table>
@@ -367,6 +422,36 @@
 		</div>
 
 	</div>
+</div>
+
+<div class="modal fade" id="receiptNumber" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-bold" id="exampleModalLabel">Add Receipt Number</h5>
+		<button type="button" data-bs-dismiss="modal" aria-label="Close" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+			<span class="sr-only">Close menu</span>
+				<svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>     
+	</div>
+	<form>
+      	<div class="modal-body">
+			<div class="grid grid-cols-1 gap-4">
+				<div class="mb-6">
+					<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Add Receipt Number</label>
+					<input type="text" id="product-input" placeholder="Please input receipt number" bind:value={fopa_number_resi} 												
+					class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+				</div>				
+			</div>
+		<div class="modal-footer">
+			<button data-bs-dismiss="modal" aria-label="Close" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-md text-sm px-3 py-2 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" >Cancel</button>
+			<button type="submit" data-order-id={order_id} on:click={addReceiptNumber}  class="focus:outline-none text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-md text-sm px-3 py-2 mr-2 mb-2 dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-900" >Update Product</button>
+		</div>
+	</form>
+    </div>
+  </div>
 </div>
 
 <style>

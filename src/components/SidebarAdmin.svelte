@@ -168,13 +168,13 @@
 					</button>
 					<ul id="dropdown-example" class="hidden py-2 space-y-2">
 						<li>
-							<a href="/admin/semua_pesanan" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Transactions</a>
+							<a href="/admin/pesanan_bayar" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Transactions</a>
 						</li>
 						<li>
 							<a href="/admin/pesanan_kirim" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Shippments</a>
 						</li>
 						<li>
-							<a href="/admin/pesanan_done" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Done Orders</a>
+							<a href="/admin/pesanan_selesai" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Done Orders</a>
 						</li>
 					</ul>
 				</li>

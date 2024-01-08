@@ -4,6 +4,8 @@
 	import Pagination from '$components/Pagination.svelte';
 	import Swal from 'sweetalert2';
 	const url_API = import.meta.env.VITE_API_SOCK;
+	import { countCart } from './countCart';
+	import { updateCartCountUI } from './countCart';
 
 	let page = parseInt(1),
 		total,
@@ -50,7 +52,16 @@
 						showConfirmButton: false,
 						timer: 1500
 					});
-					location.reload();
+
+					// Fetch the updated cart count
+					const updatedCartCount = await countCart();
+
+					// Update the UI with the new cart count
+					updateCartCountUI(updatedCartCount);
+
+					// Update the UI with the new cart count
+					await getProduct();
+					bootstrap.Modal.getInstance(document.getElementById('DetailProduct')).hide();
 				} else {
 					await Swal.fire({
 						icon: 'error',
@@ -60,8 +71,9 @@
 					console.log(error);
 				}
 			})	
-		}
+	}
 
+	
 	let search = null;
 
 	async function searchProducts() {
@@ -132,6 +144,8 @@
 
 	onMount(async () => {
 		await getProduct();
+		const initialCartCount = await countCart();
+    	updateCartCountUI(initialCartCount);
 		
 	});
 </script>

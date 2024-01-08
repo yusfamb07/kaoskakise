@@ -9,6 +9,7 @@ const config = {
     alias: {
       $components: "src/components",
       $utils: "src/routes/utils",
+      $lib: "./src/lib",
     },
   },
   preprocess: vitePreprocess(),

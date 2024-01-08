@@ -4,12 +4,17 @@
 	import Swal from 'sweetalert2';
 	import { goto } from '$app/navigation';
 	import { dataAPI } from '../routes/utils/axios';
+	import { countCart } from '../routes/(app)/user/product/countCart';
+	import { updateCartCountUI } from '../routes/(app)/user/product/countCart';
 
 	const url_API = import.meta.env.VITE_API_DIGITAL;
 	let user_id = '',
 		usernname = '',
 		userRoles = '',
 		user_photo = '';
+	
+  	let cartCount = 0;
+		
 
 	function logoutHandler() {
 		localStorage.clear();
@@ -32,46 +37,23 @@
 		goto('/login');
 	}
 
-	let carts = '';
-	async function countCart() {
-		const token = localStorage.getItem('token');
-
-
-		if (token) {
-			try {
-				const res = await dataAPI.get(`carts/showCarts`);
-				carts = res.data.data.result;
-				// total = res.data.pagination.totalPage;
-	
-				// console.log(carts);
-			} catch (error) {
-				console.log(error);
-				await Swal.fire({
-					icon: 'error',
-					title: 'Oops!',
-					confirmButtonColor: '#596066',
-					customClass: 'swal-height',
-					text: 'An error occurred while fetching data'
-				});
-			}
-		} else{
-			console.log('tidak ada token');
-		}
-
-	}
-
 	onMount(async () => {
 		await countCart();
 		user_id = localStorage.getItem('user_id');
 		usernname = localStorage.getItem('usernname');
 		userRoles = localStorage.getItem('userRoles');
 		user_photo = localStorage.getItem('user_photo');
-		console.log(user_photo);
+		// console.log(user_photo);
+    	cartCount = await countCart();
 
+		await updateCartCountUI ();
+		// console.log(cartCount);
 		if (!localStorage.getItem('token')) goto('/');
 
-		// 
+		console.log(cartCount, 'Cart Update');
 	});
+
+	
 </script>
 
 <nav class="bg-slate-50 sticky-top">
@@ -146,8 +128,8 @@
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/user/cart')}
 									>Cart
-									<div class="absolute inline-flex items-center justify-center w-8 h-6 text-xs font-semibold text-white bg-red-500 border-2 border-gray-300  rounded-full top-2 ">
-										{carts.length}
+									<div id="cart-count" class="absolute inline-flex items-center justify-center w-8 h-6 text-xs font-semibold text-white bg-red-500 border-2 border-gray-300  rounded-full top-2 ">
+										0
 									</div>
 								</a>
 								<a
