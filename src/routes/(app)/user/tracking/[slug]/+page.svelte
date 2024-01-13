@@ -43,6 +43,7 @@
     let status_payment = '';
     let payment_method = '';
     let total_all = '';
+    let tracking = [];
     async function detailOrder() {
 
 		try {
@@ -58,7 +59,22 @@
 			order_number = res.data.data.data_payment.order_number;
 			total_all = res.data.data.data_payment.totalAll;
 			payment_method = res.data.data.data_payment.payment_method;
-            console.log(img_product);
+
+			tracking = res.data.data.data_shipment.data_waybill.tracking;
+            
+            const compareDatetime = (a, b) => {
+            const datetimeA = new Date(a.datetime);
+            const datetimeB = new Date(b.datetime);
+
+            // Urutkan dari yang terbaru ke yang terlama
+            return datetimeB - datetimeA;
+            };
+
+            // Menggunakan metode sort untuk mengurutkan array
+            tracking.sort(compareDatetime);
+
+            // Sekarang, array tracking sudah diurutkan berdasarkan datetime terbaru ke terlama
+            console.log(tracking);
             
 		} catch (error) {
 			console.log(error);
@@ -203,79 +219,37 @@
             <div class="bg-slate-50 rounded-lg">
                 <p class="text-base font-semibold d-flex justify-start mt-4 px-3 py-3">TRACKING POINT</p>
                 <div class="px-4 py-3 mt-0">
-                    <div class="flex justify-start gap-5">
-                        <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute ">
-                            <img src="/order.svg" class="w-5 h-5" alt="">
+                    {#each tracking as track, index}
+                        
+                        <div class="flex justify-start gap-5">
+                            {#if track?.name === 'Pesanan Dibuat' }
+                                <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
+                                    <img src="/order.svg" class="w-5 h-5" alt="">
+                                </div>
+                            {:else if track?.name === 'Pesanan Dikemas'}
+                                <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
+                                    <img src="/shipp.svg" class="w-5 h-5" alt="">
+                                </div>
+                            {:else if track?.name === 'Pesanan telah diserahkan ke kurir'}
+                                <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
+                                    <img src="/shipp.svg" class="w-5 h-5" alt="">
+                                </div>
+                            {:else}
+                                <div class="w-7 h-7 bg-gray-400 rounded-full flex justify-center items-center absolute">
+                                </div>
+                            {/if}
+                            <div class="ml-10">
+                                <h1 class="text-red-400 font-semibold">{track?.name}</h1>
+                                <p class="font-normal">{track?.desc}</p>
+                                <p class="text-xs">{track?.datetime}</p>
+                            </div>
                         </div>
-                        <div class="ml-10">
-                            <h1 class="text-red-400 font-semibold">Pesanan Dibuat</h1>
-                            <p class="font-normal">Pesanan Dibuat</p>
-                            <p class="text-xs">09 Sept 2023 11:23:22</p>
-                        </div>
-                    </div>
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div>  
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
-                            <img src="/shipp.svg" class="w-5 h-5" alt="">
-                        </div>                        
-                        <div class="ml-10">
-                            <h1 class="text-red-400 font-semibold">Pesanan Dikemas</h1>
-                            <p class="font-normal break-words">Penjual telah mengatur pengiriman, Menunggu pesanan diserahkan ke pihak jasa kirim</p>
-                            <p class="text-xs">09 Sept 2023 11:23:22</p>
-                        </div>
-                    </div> 
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div>   
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 bg-gray-400 rounded-full flex justify-center items-center absolute">
-                        </div>                        
-                        <div class="ml-10">
-                            <p class="font-normal break-words">Pesanan telah diserahkan ke kurir</p>
-                            <p class="text-xs">10 Sept 2023 11:23:22</p>
-                        </div>
-                    </div>
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div> 
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 bg-gray-400 rounded-full flex justify-center items-center absolute">
-                        </div>                        
-                        <div class="ml-10">
-                            <p class="font-normal break-words">Pesanan telah dikirim dari lokasi transit Hub </p>
-                            <p class="text-xs">10 Sept 2023 11:23:22</p>
-                        </div>
-                    </div>                   
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div> 
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 bg-gray-400 rounded-full flex justify-center items-center absolute">
-                        </div>                        
-                        <div class="ml-10">
-                            <p class="font-normal break-words">Pesanan telah sampai di lokasi transit Hub Cibodas First Mile Hub</p>
-                            <p class="text-xs">11 Sept 2023 10:23:22</p>
-                        </div>
-                    </div>                    
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div> 
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
-                            <img src="/tracking.svg" class="w-5 h-5" alt="">
-                        </div>                        
-                        <div class="ml-10">
-                            <h1 class="text-red-400 font-semibold">Pesanan Dikirim</h1>
-                            <p class="font-normal break-words">Pesanan sedang diantar ke alamat tujuan</p>
-                            <p class="text-xs">12 Sept 2023 11:23:22</p>
-                        </div>
-                    </div>                     
-                    <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div>  
-                    <div class="flex justify-start gap-3">
-                        <div class="w-7 h-7 border-solid border-2 border-gray-400 rounded-full flex justify-center items-center absolute">
-                            <img src="/received.svg" class="w-5 h-5" alt="">
-                        </div>                        
-                        <div class="ml-10">
-                            <h1 class="text-red-400 font-semibold">Pesanan Terkirim</h1>
-                            <p class="font-normal break-words">Pesanan telah sampai diterima oleh Yang bersangkutan. Penerima: Yusfa Muhammad Bakran</p>
-                            <p class="text-xs">12 Sept 2023 00:23:22</p>
-                        </div>
-                    </div>                
+                        {#if index !== tracking.length - 1}
+                            <div class="inline-block h-[60px] ml-3 min-h-[1em] w-0.5 self-stretch border-dashed border-2 border-red-400 opacity-100 dark:opacity-50"></div>
+                        {/if}                    
+                    {/each}
                 </div>
             </div>
         </div>
-   
     </div>
 </div>

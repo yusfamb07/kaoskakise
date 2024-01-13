@@ -22,17 +22,17 @@
 			products2 = res.data.data.slice(5,8);
 			total = res.data.pagination.totalPage;
 
-			console.log(products1);
-			console.log(products2);
+			// console.log(products1);
+			// console.log(products2);
 		} catch (error) {
 			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
+			// await Swal.fire({
+			// 	icon: 'error',
+			// 	title: 'Oops!',
+			// 	confirmButtonColor: '#596066',
+			// 	customClass: 'swal-height',
+			// 	text: 'An error occurred while fetching data'
+			// });
 		}
 	}
 

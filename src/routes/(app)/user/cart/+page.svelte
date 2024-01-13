@@ -19,7 +19,7 @@
 	};
 
 
-	async function countCart() {
+	async function countCartPage() {
 		// isLoading = true;
 		// setTimeout(() => {
 		// 	isLoading = false;
@@ -28,7 +28,6 @@
 			const res = await dataAPI.get(`carts/showCarts`);
 			carts = res.data.data.result;
 			total = res.data.data.sum;
-			console.log(carts.length);
 
 			const cartsWithTotalCost = carts.map((item) => {
 			const cartQty = parseFloat(item.cart_qty);
@@ -63,43 +62,43 @@
 		return cartQty * prodPrice;
 	}
 
-	
+
 
 	const TotalQty = async (isIncrement, cart) => {
 		const newCartQty = isIncrement
 			? parseFloat(cart.cart_qty) + 1
 			: Math.max(parseFloat(cart.cart_qty) - 1, 0);
-		
-		cart.cart_qty = newCartQty;
-
 		if (newCartQty === 0) {
-			handleDelete 
-		}
+			// Call handleDelete function when quantity becomes zero
+       		await handleDelete(event, cart?.cart_id);
+		} else {
+			cart.cart_qty = newCartQty;
 
-		try {
-			const res = await fetch(
-				`${url_API}/carts/updateCart/${cart.cart_id}`,
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						cart_qty: newCartQty // Assuming your API expects 'cart_qty' as the parameter to update
-					}),
+			// console.log(newCartQty);
 
-					headers: {
-						'Content-Type': 'application/json',
-						Authorization: `Bearer ${localStorage.getItem('token')}`
+			try {
+				const res = await fetch(
+					`${url_API}/carts/updateCart/${cart.cart_id}`,
+					{
+						method: 'POST',
+						body: JSON.stringify({
+							cart_qty: newCartQty
+						}),
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${localStorage.getItem('token')}`
+						}
 					}
-				}
-			).then((res) => res.json());
-			
-			await countCart();
-			
-		} catch (error) {
-			console.log(error);
+				).then((res) => res.json());
+
+				await countCartPage();
+			} catch (error) {
+				console.log(error);
+			}
 		}
-		
-		carts = [...carts];
 	};
+
+
 
 	let data_address = [];
 	let data_ongkirs = [];
@@ -114,7 +113,7 @@
 		
 		const user_id = localStorage.getItem('user_id');
 		const selectedValue = event.target.value.split(',');
-		console.log(selectedValue[1]);
+		// console.log(selectedValue[1]);
 			formData.value = parseInt(selectedValue);
 
 			const selectedOption = data_ongkirs.find(option => option.value === Number(selectedValue[0]));
@@ -188,7 +187,7 @@
 			const res = await dataAPI.get(`/carts/formPayment/${user_id}`);
 			rekening = res.data.data.no_rek;
 
-			console.log(rekening);
+			// console.log(rekening);
 		} catch (error) {
 			console.log(error);
 			await Swal.fire({
@@ -221,31 +220,51 @@
 		location.reload();
 	}
 
-	const handleDelete = async (event) => {
+	// const handleDelete = async (event) => {
+	// 	event.preventDefault();
+	// 	const { cartId } = event.currentTarget.dataset;
+
+	// 	fetch(`${url_API}/carts/deleteCart/${cartId}`, {
+	// 		method: 'DELETE',
+
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 			Authorization: `Bearer ${localStorage.getItem('token')}`
+	// 		}
+	// 	})
+	// 		.then(async (response) => {
+	// 			console.log(response);
+	// 			await countCartPage()
+	// 			// console.log(user_status_id);
+	// 		})
+	// 		.catch((error) => {
+	// 			console.log(error);
+	// 		});
+	// };
+
+	const handleDelete = async (event, cartId) => {
 		event.preventDefault();
-		const { cartId } = event.currentTarget.dataset;
 
-		fetch(`${url_API}/carts/deleteCart/${cartId}`, {
-			method: 'DELETE',
-
-			headers: {
-				'Content-Type': 'application/json',
-				Authorization: `Bearer ${localStorage.getItem('token')}`
-			}
-		})
-			.then(async (response) => {
-				console.log(response);
-				await countCart()
-				// console.log(user_status_id);
-			})
-			.catch((error) => {
-				console.log(error);
+		try {
+			const response = await fetch(`${url_API}/carts/deleteCart/${cartId}`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${localStorage.getItem('token')}`
+				}
 			});
+
+			await countCartPage();
+		} catch (error) {
+			console.log(error);
+		}
 	};
 
 
+
+
 	onMount(async () => {
-		await countCart();
+		await countCartPage();
  	 	user_id = localStorage.getItem('user_id');
 
 		
@@ -315,11 +334,11 @@
 									</td>
 									<td class="px-3 py-2">
 										<a href="#!" 
-										data-cart-id={cart?.cart_id}
-										on:click={handleDelete} 
-										class="lg:text-base sm:text-sm font-medium text-red-400 dark:text-red-300 hover:underline"
-											>Remove</a
+											on:click={(event) => handleDelete(event, cart?.cart_id)} 
+											class="lg:text-base sm:text-sm font-medium text-red-400 dark:text-red-300 hover:underline"
 										>
+											Remove
+										</a>
 									</td>
 								</tr>	
 							{/each}

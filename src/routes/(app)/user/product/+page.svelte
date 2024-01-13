@@ -4,8 +4,8 @@
 	import Pagination from '$components/Pagination.svelte';
 	import Swal from 'sweetalert2';
 	const url_API = import.meta.env.VITE_API_SOCK;
-	import { countCart } from './countCart';
-	import { updateCartCountUI } from './countCart';
+	import { countCartBadge } from './countCartBadge';
+	import { updateCartCountUI } from './countCartBadge';
 
 	let page = parseInt(1),
 		total,
@@ -44,7 +44,6 @@
 				Authorization: `Bearer ${localStorage.getItem('token')}`
 			}
 		}).then(async (response) => {
-				console.log(response);
 				if (response.status === 200) {
 					await Swal.fire({
 						icon: 'success',
@@ -53,15 +52,10 @@
 						timer: 1500
 					});
 
-					// Fetch the updated cart count
-					const updatedCartCount = await countCart();
-
-					// Update the UI with the new cart count
-					updateCartCountUI(updatedCartCount);
-
-					// Update the UI with the new cart count
 					await getProduct();
 					bootstrap.Modal.getInstance(document.getElementById('DetailProduct')).hide();
+					const updatedCartCount = await countCartBadge();
+					updateCartCountUI(updatedCartCount);
 				} else {
 					await Swal.fire({
 						icon: 'error',
@@ -144,7 +138,7 @@
 
 	onMount(async () => {
 		await getProduct();
-		const initialCartCount = await countCart();
+		const initialCartCount = await countCartBadge();
     	updateCartCountUI(initialCartCount);
 		
 	});

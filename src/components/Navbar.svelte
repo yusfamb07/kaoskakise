@@ -4,14 +4,15 @@
 	import Swal from 'sweetalert2';
 	import { goto } from '$app/navigation';
 	import { dataAPI } from '../routes/utils/axios';
-	import { countCart } from '../routes/(app)/user/product/countCart';
-	import { updateCartCountUI } from '../routes/(app)/user/product/countCart';
+	import { countCartBadge } from '../routes/(app)/user/product/countCartBadge';
+	import { updateCartCountUI } from '../routes/(app)/user/product/countCartBadge';
 
 	const url_API = import.meta.env.VITE_API_DIGITAL;
 	let user_id = '',
 		usernname = '',
 		userRoles = '',
 		user_photo = '';
+		// token = '';
 	
   	let cartCount = 0;
 		
@@ -38,19 +39,21 @@
 	}
 
 	onMount(async () => {
-		await countCart();
+		await countCartBadge();
 		user_id = localStorage.getItem('user_id');
 		usernname = localStorage.getItem('usernname');
 		userRoles = localStorage.getItem('userRoles');
 		user_photo = localStorage.getItem('user_photo');
-		// console.log(user_photo);
-    	cartCount = await countCart();
-
-		await updateCartCountUI ();
+		if (localStorage.getItem('token')) {
+			
+			cartCount = await countCartBadge();
+	
+			await updateCartCountUI();
+		}
 		// console.log(cartCount);
 		if (!localStorage.getItem('token')) goto('/');
 
-		console.log(cartCount, 'Cart Update');
+		// console.log(cartCount, 'Cart Update');
 	});
 
 	
@@ -195,7 +198,7 @@
 								<a
 									href="/guest/dashboard"
 									class=" text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('//guest/dashboard')}
+									class:active={$page.url.pathname.includes('/guest/dashboard')}
 									aria-current="page">Home</a
 								>
 								<a
@@ -214,8 +217,26 @@
 									href="/login"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
 									class:active={$page.url.pathname.includes('/login')}
+									id="dropdownHoverButton1" data-dropdown-toggle="dropdownHover1" data-dropdown-trigger="hover"
 									>Cart</a
 								>
+								<div id="dropdownHover1" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+									<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton1">
+										<li>
+											<a href="#" class="block px-4 py-2 ">
+												<div class="flex justify-center items-center">
+													<img class="w-48 px-3 py-3" src="/empty-logo.png" alt="">
+												</div>
+												<div class="flex justify-center items-center">
+													<p class=" text-center text-sm  font-semibold uppercase text-gray-800">No product yet</p>
+												</div>
+												<div class="flex justify-center items-center">
+													<p class=" text-center text-sm  font-medium text-gray-800">Please Sign in</p>
+												</div>
+											</a>
+										</li>
+									</ul>
+								</div>
 								<a
 									href="/guest/about"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
@@ -223,11 +244,28 @@
 									>About</a
 								>
 								<a
-									href="/guest/tracking"
+									href="/login"
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-									class:active={$page.url.pathname.includes('/guest/tracking')}
+									class:active={$page.url.pathname.includes('/login')}
+									id="dropdownHoverButton" data-dropdown-toggle="dropdownHover" data-dropdown-trigger="hover"
 									>Orders</a
 								>
+								<div id="dropdownHover" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+									<ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+									<li>
+										<a href="#" class="block px-4 py-2 ">
+											<div class="flex justify-center items-center">
+												<img class="w-48 px-3 py-3" src="/empty-logo.png" alt="">
+											</div>
+											<div class="flex justify-center items-center">
+												<p class=" text-center text-sm  font-semibold uppercase text-gray-800">No orders yet</p>
+											</div>
+											<div class="flex justify-center items-center">
+												<p class=" text-center text-sm  font-medium text-gray-800">Please Sign in</p>
+											</div>
+										</a>
+									</li>
+								</div>
 								<a
 									href="/login" 
 									class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"

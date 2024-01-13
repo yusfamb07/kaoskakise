@@ -1,6 +1,6 @@
 import { dataAPI } from "$utils/axios";
 
-export async function countCart() {
+export async function countCartBadge() {
   const token = localStorage.getItem("token");
 
   if (token) {
@@ -8,16 +8,13 @@ export async function countCart() {
       const res = await dataAPI.get(`carts/showCarts`);
       const carts = res.data.data.result.length;
 
-      console.log(carts);
-
-      return carts; // Return the count of carts
+      return carts;
     } catch (error) {
       console.error(error);
-      // Rest of the error handling...
     }
   } else {
     console.log("tidak ada token");
-    return 0; // Return a default value when there is no token
+    return 0;
   }
 }
 
