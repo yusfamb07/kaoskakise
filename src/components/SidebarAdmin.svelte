@@ -278,7 +278,10 @@
 							<a href="/admin/edit_banner" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Banner</a>
 						</li>
 						<li>
-							<a href="/admin/edit_cover" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Cover</a>
+							<a href="/admin/edit_cover" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Cover Login</a>
+						</li>
+						<li>
+							<a href="/admin/edit_payment" class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-11 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">Payment Method</a>
 						</li>
 					</ul>
 				</li>

@@ -48,13 +48,15 @@
 			
 			cartCount = await countCartBadge();
 	
-			await updateCartCountUI();
-		}
+			updateCartCountUI();
+		} 
 		// console.log(cartCount);
-		if (!localStorage.getItem('token')) goto('/');
+		// if (!localStorage.getItem('token')) goto('/');
 
 		// console.log(cartCount, 'Cart Update');
 	});
+
+	
 
 	
 </script>

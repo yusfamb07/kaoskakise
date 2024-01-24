@@ -19,11 +19,11 @@
 			const res = await dataAPI.get(`carts/listUnpayment`);
 
             unpayment = res.data.data;
-            products = res.data.data[0].products;
-            if (products.length > 0) {
-            } else {
-                console.log('Data is empty');
-            }
+            products = res.data.data[0]?.products;
+            // if (products.length > 0) {
+            // } else {
+            //     console.log('Data is empty');
+            // }
 
             tabs[0].content = unpayment.map(item => ({
                 id_order: item.id,  
@@ -69,14 +69,15 @@
                 total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.subtotal)), 
             }));
 		} catch (error) {
-			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
+			// console.log(error);
+			console.log('product tidak ada');
+			// await Swal.fire({
+			// 	icon: 'error',
+			// 	title: 'Oops!',
+			// 	confirmButtonColor: '#596066',
+			// 	customClass: 'swal-height',
+			// 	text: 'An error occurred while fetching data'
+			// });
 		}
 	}
 
@@ -86,7 +87,11 @@
 		try {
 			const res = await dataAPI.get(`carts/listPayment`);
 			payment = res.data.data;
-            products = res.data.data[0].products;
+            products = res.data.data[0]?.products;
+            // if (products.length > 0) {
+            // } else {
+            //     console.log('Data is empty');
+            // }
 
             tabs[1].content = payment.map(item => ({
                 id_cart: item.id_cart,
@@ -123,14 +128,10 @@
             }));
 
 		} catch (error) {
-			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
+			// console.log(error);
+			console.log('product tidak ada');
+
+			
 		}
 	}
 
@@ -163,29 +164,74 @@
             }));
 
             tabs[2].prod = products.map(item => ({
-                fopa_id: item.fopa_id,
+                fopa_id: item?.fopa_id,
+                image: `<img src="${item?.image
+                        ? `${url_API}/products/image/${item?.image}`
+                        : '/product-default.png'}" class="w-44" alt="">`,
+                name_product: item?.name,
+                end_date: item?.end_date,
+                price: `Rp ${Number(item?.prod_price).toLocaleString('id-ID')}`,
+                subtotal: `Rp ${Number(item?.total).toLocaleString('id-ID')}`,
+                qty: item?.qty,
+                total_price : parseFloat(parseFloat(item?.ongkir) + parseFloat(item?.subtotal)), 
+            }));
+
+		} catch (error) {
+			// console.log(error);
+			console.log('product tidak ada');
+
+
+		}
+	}
+
+    let done_order = [];
+    async function DoneTabs() {
+
+		try {
+			const res = await dataAPI.get(`carts/listDone`);
+			done_order = res.data.data;
+            products = res.data.data[0].products;
+
+            tabs[3].content = done_order.map(item => ({
+                id_cart: item.id_cart,
+                fopa_id : item.fopa_id,
+                order_number: item.order_number,
                 image: `<img src="${item.image
                         ? `${url_API}/products/image/${item.image}`
                         : '/product-default.png'}" class="w-44" alt="">`,
                 name_product: item.name,
+                status_payment: item.status,
+                payment_method: item.payment,
+                no_rek: item.no_rek,
                 end_date: item.end_date,
                 price: `Rp ${Number(item.prod_price).toLocaleString('id-ID')}`,
                 subtotal: `Rp ${Number(item.total).toLocaleString('id-ID')}`,
+                total: `Rp ${Number(item.totalAll).toLocaleString('id-ID')}`,
                 qty: item.qty,
-                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.subtotal)), 
+                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.totalAll)),
+                shipping_cost : parseFloat(item.ongkir),
+                payment: item.payment, 
+            }));
+
+            tabs[3].prod = products.map(item => ({
+                fopa_id: item?.fopa_id,
+                image: `<img src="${item?.image
+                        ? `${url_API}/products/image/${item?.image}`
+                        : '/product-default.png'}" class="w-44" alt="">`,
+                name_product: item?.name,
+                end_date: item?.end_date,
+                price: `Rp ${Number(item?.prod_price).toLocaleString('id-ID')}`,
+                subtotal: `Rp ${Number(item?.total).toLocaleString('id-ID')}`,
+                qty: item?.qty,
+                total_price : parseFloat(parseFloat(item?.ongkir) + parseFloat(item?.subtotal)), 
             }));
 
 		} catch (error) {
-			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
+			console.log('product tidak ada');
+
 		}
 	}
+
 
     let cancel_order = [];
     async function CancelTabs() {
@@ -193,30 +239,46 @@
 		try {
 			const res = await dataAPI.get(`carts/listCancel`);
 			cancel_order = res.data.data;
+            products = res.data.data[0].products;
 
             tabs[4].content = cancel_order.map(item => ({
                 id_cart: item.id_cart,
+                fopa_id : item.fopa_id,
                 order_number: item.order_number,
                 image: `<img src="${item.image
                         ? `${url_API}/products/image/${item.image}`
                         : '/product-default.png'}" class="w-44" alt="">`,
                 name_product: item.name,
+                status_payment: item.status,
+                payment_method: item.payment,
+                no_rek: item.no_rek,
+                end_date: item.end_date,
+                price: `Rp ${Number(item.prod_price).toLocaleString('id-ID')}`,
                 subtotal: `Rp ${Number(item.total).toLocaleString('id-ID')}`,
-                shipping_cost : parseFloat(item.ongkir),
-                totalFloat : parseFloat(item.total),
-                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.subtotal)),
+                total: `Rp ${Number(item.totalAll).toLocaleString('id-ID')}`,
                 qty: item.qty,
+                total_price : parseFloat(parseFloat(item.ongkir) + parseFloat(item.totalAll)),
+                shipping_cost : parseFloat(item.ongkir),
+                payment: item.payment, 
+            }));
+
+            tabs[4].prod = products.map(item => ({
+                fopa_id: item?.fopa_id,
+                image: `<img src="${item?.image
+                        ? `${url_API}/products/image/${item?.image}`
+                        : '/product-default.png'}" class="w-44" alt="">`,
+                name_product: item?.name,
+                end_date: item?.end_date,
+                price: `Rp ${Number(item?.prod_price).toLocaleString('id-ID')}`,
+                subtotal: `Rp ${Number(item?.total).toLocaleString('id-ID')}`,
+                qty: item?.qty,
+                total_price : parseFloat(parseFloat(item?.ongkir) + parseFloat(item?.subtotal)), 
             }));
 
 		} catch (error) {
-			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
+			console.log('product tidak ada');
+			// console.log(error);
+
 		}
 	}
 
@@ -277,7 +339,6 @@
 
         Swal.fire({
                 title: 'Do you want to cancel the order?',
-                showDenyButton: true,
                 showCancelButton: true,
                 confirmButtonText: 'Save',
             }).then((result) => {
@@ -290,14 +351,14 @@
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                location.reload()
-                Swal.fire('Saved!', '', 'success')
+                Swal.fire('Ypur order has been cancel!', '', 'success')
+                unPaymentTabs()
             } else if (result.isDenied) {
                 Swal.fire('Changes are not saved', '', 'info')
             }
         }).catch((error) => {
-				console.log(error);
-			});
+			console.log(error);
+		});
 	};
 
     let requestTransfer = [];
@@ -365,6 +426,7 @@
         await PaymentTabs();
         await DeliveryTabs();
         await CancelTabs();
+        await DoneTabs();
         
         document.querySelectorAll('#handleTransfer').forEach((el) => {
             el.addEventListener('click', () => {
@@ -431,7 +493,7 @@
                                         <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
                                     </div>
                                     <div class="border-b border-gray-300">
-                                        <h5 class="font-semibold text-xl  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
+                                        <h5 class="font-semibold text-lg  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
                                         <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
                                     </div>
                                 </div>
@@ -531,9 +593,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        {#if item?.payment_method === 'Transfer Bank'} 
-
-                                            <div class="flex justify-end gap-2">
+                                        
+                                        <div class="flex justify-end gap-2">
                                                 <button
                                                     id="handleDelete"
                                                     data-cancel-id={item.fopa_id}
@@ -542,313 +603,501 @@
                                                 >
                                                     Cancel
                                                 </button>
-                                                {@html item.action}
-                                                
+                                                {#if item?.payment_method === 'Transfer Bank'} 
+                                                     {@html item.action}
+                                                {/if}
                                             </div>
-                                            <div class="py-2 w-full flex justify-end">
-                                                <p class="text-sm font-medium">Pay before {item?.end_date} with BCA Bank</p>
-                                            </div>
-                                        {/if}
+                                            {#if item?.payment_method === 'Transfer Bank'} 
+                                                <div class="py-2 w-full flex justify-end">
+                                                    <p class="text-sm font-medium">Pay before {item?.end_date} with BCA Bank</p>
+                                                </div>
+                                            {/if}
                                         
                                     </div>
                                 </div>
                             </div>
                             {/each}
                         {:else if tab.title === "Payment"}
-                            {#each tab.content as item}
-                                <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
-                                    <div class="grid grid-cols-9 mt-3">
-                                        <div class="col-span-8 border-b border-gray-300">
-                                            <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
-                                        </div>
-                                        <div class="border-b border-gray-300">
-                                            <h5 class="font-semibold text-xl  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
-                                            <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
-                                        </div>
-                                    </div>
-                                    {#each tab.prod as item }    
-                                        <div class="grid grid-cols-9 mt-3">
-                                            <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                            <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                            <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
-                                                on:click={handleRowClickPayment} >
-                                                <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                                                    <div class=" py-2 w-full ml-5 flex items-start">
-                                                    {@html item?.image}
-                                                            <div>
-                                                                <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
-                                                            </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="border-b border-gray-300">
-                                                <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
-                                            </div>
-                                        </div>
-                                    {/each}
-                                    <div class="grid grid-cols-9 mt-3">
-                                        <div class="col-span-7">
-                                            <div class="flex items-center">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-center">
-                                                        <p class="text-base font-medium">Payment Method</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-64">
-                                                    <div class="py-2 w-full ml-5 flex items-center gap-1">
-                                                        <img src={item.payment_method === 'Transfer Bank'
-                                                            ? '/bca.png'
-                                                            : '/cod.png'} class="w-16 " alt="">
-                                                        <p class="text-base font-semibold"> {item?.payment_method}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {#if item.payment_method === 'Transfer Bank'}                  
-                                                <div class="flex">
-                                                    <div class="flex-none w-32">
-                                                        <div class="py-2 w-full flex items-start">
-                                                            <p class="text-base font-medium">Rekening Number</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-initial w-5">
-                                                        <div class="py-2 mt-1">                        
-                                                            <p class="text-sm font-semibold">: </p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-initial w-80">
-                                                        <div class="py-2 w-full ml-5 flex items-start">
-                                                            <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {/if}
-                                        </div>
-                                        <div class="col-span-2">
-                                            <div class="flex">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-start">
-                                                        <p class="text-base font-medium">Shipping Cost</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-32">
-                                                    <div class="py-2 w-full ml-5 flex items-start">
-                                                        <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="flex">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-start">
-                                                        <p class="text-base font-medium">Total</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-32">
-                                                    <div class="py-2 w-full ml-5 flex items-start">
-                                                        <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <div class="flex justify-end">
-                                            <button
-                                                id="handleDelete"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#evidenceModal"
-                                                data-evidence-id={item.fopa_id}
-                                                on:click={handleEvidence}
-                                                class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
-                                            >
-                                                Show Evidence
-                                            </button>
-                                        </div>
-                                        </div>
-                                    </div>
-                                   
-                                </div>
-                            {/each}
-                        {:else if tab.title === "Delivery"}
-                            {#each tab.content as item}
-                                <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
-                                    <div class="grid grid-cols-9 mt-3">
-                                        <div class="col-span-8 border-b border-gray-300">
-                                            <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
-                                        </div>
-                                        <div class="border-b border-gray-300">
-                                            <h5 class="font-semibold text-xl  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
-                                            <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
-                                        </div>
-                                    </div>
-                                    {#each tab.prod as item }    
-                                        <div class="grid grid-cols-9 mt-3">
-                                            <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                            <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                            <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
-                                                on:click={handleRowClickPayment} >
-                                                <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                                                    <div class=" py-2 w-full ml-5 flex items-start">
-                                                    {@html item?.image}
-                                                            <div>
-                                                                <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
-                                                            </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="border-b border-gray-300">
-                                                <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
-                                            </div>
-                                        </div>
-                                    {/each}
-                                    <div class="grid grid-cols-9 mt-3">
-                                        <div class="col-span-7">
-                                            <div class="flex items-center">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-center">
-                                                        <p class="text-base font-medium">Payment Method</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-64">
-                                                    <div class="py-2 w-full ml-5 flex items-center gap-1">
-                                                        <img src={item.payment_method === 'Transfer Bank'
-                                                            ? '/bca.png'
-                                                            : '/cod.png'} class="w-16 " alt="">
-                                                        <p class="text-base font-semibold"> {item?.payment_method}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {#if item.payment_method === 'Transfer Bank'}                  
-                                                <div class="flex">
-                                                    <div class="flex-none w-32">
-                                                        <div class="py-2 w-full flex items-start">
-                                                            <p class="text-base font-medium">Rekening Number</p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-initial w-5">
-                                                        <div class="py-2 mt-1">                        
-                                                            <p class="text-sm font-semibold">: </p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex-initial w-80">
-                                                        <div class="py-2 w-full ml-5 flex items-start">
-                                                            <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {/if}
-                                        </div>
-                                        <div class="col-span-2">
-                                            <div class="flex">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-start">
-                                                        <p class="text-base font-medium">Shipping Cost</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-32">
-                                                    <div class="py-2 w-full ml-5 flex items-start">
-                                                        <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="flex">
-                                                <div class="flex-none w-32">
-                                                    <div class="py-2 w-full flex items-start">
-                                                        <p class="text-base font-medium">Total</p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-5">
-                                                    <div class="py-2 mt-1">                        
-                                                        <p class="text-sm font-semibold">: </p>
-                                                    </div>
-                                                </div>
-                                                <div class="flex-initial w-32">
-                                                    <div class="py-2 w-full ml-5 flex items-start">
-                                                        <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <div class="flex justify-end">
-                                            <button
-                                                id="handleDelete"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#evidenceModal"
-                                                data-evidence-id={item.fopa_id}
-                                                on:click={handleEvidence}
-                                                class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
-                                            >
-                                                Show Evidence
-                                            </button>
-                                        </div>
-                                        </div>
-                                    </div>
-                                   
-                                </div>
-                            {/each}    
-                        {:else}
                         {#each tab.content as item}
                             <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
-
-                        <div class="grid grid-cols-9 mt-3">
-                                <div class="col-span-8 border-b border-gray-300">
-                                    <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
-                                </div>
-                                <div class="border-b border-gray-300">
-                                    <!-- <h5 class="font-semibo ld text-xl  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5> -->
-                                </div>
-                            </div>
                                 <div class="grid grid-cols-9 mt-3">
-                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                    <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                    <div class="col-span-8 border-b border-gray-300 cursor-pointer" on:click={() => handleRowClick(item.fopa_id)} >
-                                        <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                                            <div class=" py-2 w-full ml-5 flex items-start">
-                                            {@html item?.image}
-                                                    <div>
-                                                        <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
-                                                    </div>
-                                            </div>
-                                        </div>
+                                    <div class="col-span-8 border-b border-gray-300">
+                                        <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
                                     </div>
                                     <div class="border-b border-gray-300">
-                                        <p class="text-2xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.totalFloat + item.shipping_cost)).toLocaleString('id-ID')}`}</p>
+                                        <h5 class="font-semibold text-lg  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
+                                        <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
                                     </div>
                                 </div>
-                                <div class="flex justify-end">
-                                    <button
-                                        id="handleDelete"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#evidenceModal"
-                                        data-evidence-id={item.id_cart}
-                                        on:click={handleEvidence}
-                                        class="w-28 rounded-md bg-red-500 text-white font-semibold text-sm h-9 mt-2 mb-3"
-                                    >
-                                        Buy Again
-                                    </button>
-                                    
+                                {#each tab.prod as item }    
+                                    <div class="grid grid-cols-9 mt-3">
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                        <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
+                                            on:click={handleRowClickPayment} >
+                                            <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                <div class=" py-2 w-full ml-5 flex items-start">
+                                                {@html item?.image}
+                                                        <div>
+                                                            <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="border-b border-gray-300">
+                                            <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                        </div>
+                                    </div>
+                                {/each}
+                                <div class="grid grid-cols-9 mt-3">
+                                    <div class="col-span-7">
+                                        <div class="flex items-center">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-center">
+                                                    <p class="text-base font-medium">Payment Method</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-64">
+                                                <div class="py-2 w-full ml-5 flex items-center gap-1">
+                                                    <img src={item.payment_method === 'Transfer Bank'
+                                                        ? '/bca.png'
+                                                        : '/cod.png'} class="w-16 " alt="">
+                                                    <p class="text-base font-semibold"> {item?.payment_method}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {#if item.payment_method === 'Transfer Bank'}                  
+                                            <div class="flex">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-start">
+                                                        <p class="text-base font-medium">Rekening Number</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-80">
+                                                    <div class="py-2 w-full ml-5 flex items-start">
+                                                        <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="col-span-2">
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Shipping Cost</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Total</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <div class="flex justify-end">
+                                        <button
+                                            id="handleDelete"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#evidenceModal"
+                                            data-evidence-id={item.fopa_id}
+                                            on:click={handleEvidence}
+                                            class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
+                                        >
+                                            Show Evidence
+                                        </button>
+                                    </div>
+                                    </div>
                                 </div>
-                        </div>
+                                
+                            </div>
+                        {/each}
+                        {:else if tab.title === "Delivery"}
+                        {#each tab.content as item}
+                            <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
+                                <div class="grid grid-cols-9 mt-3">
+                                    <div class="col-span-8 border-b border-gray-300">
+                                        <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
+                                    </div>
+                                    <div class="border-b border-gray-300">
+                                        <h5 class="font-semibold text-lg  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
+                                        <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
+                                    </div>
+                                </div>
+                                {#each tab.prod as item }    
+                                    <div class="grid grid-cols-9 mt-3">
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                        <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
+                                            on:click={handleRowClickPayment} >
+                                            <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                <div class=" py-2 w-full ml-5 flex items-start">
+                                                {@html item?.image}
+                                                        <div>
+                                                            <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="border-b border-gray-300">
+                                            <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                        </div>
+                                    </div>
+                                {/each}
+                                <div class="grid grid-cols-9 mt-3">
+                                    <div class="col-span-7">
+                                        <div class="flex items-center">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-center">
+                                                    <p class="text-base font-medium">Payment Method</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-64">
+                                                <div class="py-2 w-full ml-5 flex items-center gap-1">
+                                                    <img src={item.payment_method === 'Transfer Bank'
+                                                        ? '/bca.png'
+                                                        : '/cod.png'} class="w-16 " alt="">
+                                                    <p class="text-base font-semibold"> {item?.payment_method}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {#if item.payment_method === 'Transfer Bank'}                  
+                                            <div class="flex">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-start">
+                                                        <p class="text-base font-medium">Rekening Number</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-80">
+                                                    <div class="py-2 w-full ml-5 flex items-start">
+                                                        <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="col-span-2">
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Shipping Cost</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Total</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <div class="flex justify-end">
+                                        <button
+                                            id="handleDelete"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#evidenceModal"
+                                            data-evidence-id={item.fopa_id}
+                                            on:click={handleEvidence}
+                                            class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
+                                        >
+                                            Show Evidence
+                                        </button>
+                                    </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        {/each} 
+                        {:else if tab.title === "Done"}
+                        {#each tab.content as item}
+                            <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
+                                <div class="grid grid-cols-9 mt-3">
+                                    <div class="col-span-8 border-b border-gray-300">
+                                        <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
+                                    </div>
+                                    <div class="border-b border-gray-300">
+                                        <h5 class="font-semibold text-md  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
+                                        <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
+                                    </div>
+                                </div>
+                                {#each tab.prod as item }    
+                                    <div class="grid grid-cols-9 mt-3">
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                        <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
+                                            on:click={handleRowClickPayment} >
+                                            <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                <div class=" py-2 w-full ml-5 flex items-start">
+                                                {@html item?.image}
+                                                        <div>
+                                                            <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="border-b border-gray-300">
+                                            <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                        </div>
+                                    </div>
+                                {/each}
+                                <div class="grid grid-cols-9 mt-3">
+                                    <div class="col-span-7">
+                                        <div class="flex items-center">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-center">
+                                                    <p class="text-base font-medium">Payment Method</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-64">
+                                                <div class="py-2 w-full ml-5 flex items-center gap-1">
+                                                    <img src={item.payment_method === 'Transfer Bank'
+                                                        ? '/bca.png'
+                                                        : '/cod.png'} class="w-16 " alt="">
+                                                    <p class="text-base font-semibold"> {item?.payment_method}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {#if item.payment_method === 'Transfer Bank'}                  
+                                            <div class="flex">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-start">
+                                                        <p class="text-base font-medium">Rekening Number</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-80">
+                                                    <div class="py-2 w-full ml-5 flex items-start">
+                                                        <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    <div class="col-span-2">
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Shipping Cost</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex">
+                                            <div class="flex-none w-32">
+                                                <div class="py-2 w-full flex items-start">
+                                                    <p class="text-base font-medium">Total</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-5">
+                                                <div class="py-2 mt-1">                        
+                                                    <p class="text-sm font-semibold">: </p>
+                                                </div>
+                                            </div>
+                                            <div class="flex-initial w-32">
+                                                <div class="py-2 w-full ml-5 flex items-start">
+                                                    <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    
+                                    </div>
+                                </div>
+                            
+                            </div>
+                        {/each}    
+                        {:else}
+                        {#each tab.content as item}
+                                <div class="max-w-full p-6 bg-white border border-gray-200 rounded-lg shadow mt-3">
+                                    <div class="grid grid-cols-9 mt-3">
+                                        <div class="col-span-8 border-b border-gray-300">
+                                            <h5 class="mb-2 text-xl font-semibold tracking-tight text-gray-900 ">Order Number: {item?.order_number} </h5>
+                                        </div>
+                                        <div class="border-b border-gray-300">
+                                            <h5 class="font-semibold text-lg  uppercase text-red-500 flex justify-end">{item?.status_payment}</h5>
+                                            <!-- <span class="bg-green-100 text-green-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">Sending</span> -->
+                                        </div>
+                                    </div>
+                                    {#each tab.prod as item }    
+                                        <div class="grid grid-cols-9 mt-3">
+                                            <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                            <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                            <div class="col-span-8 border-b border-gray-300 cursor-pointer" data-fopa-id={item.fopa_id}
+                                                on:click={handleRowClickPayment} >
+                                                <div class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                                    <div class=" py-2 w-full ml-5 flex items-start">
+                                                    {@html item?.image}
+                                                            <div>
+                                                                <p class="text-xl font-semibold text-black">{item?.name_product} <br><span class="font-medium text-base">x {item.qty}</span></p>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="border-b border-gray-300">
+                                                <h5 class="font-semibold text-xl text-red-500 flex justify-end">{item?.subtotal}</h5>
+                                            </div>
+                                        </div>
+                                    {/each}
+                                    <div class="grid grid-cols-9 mt-3">
+                                        <div class="col-span-7">
+                                            <div class="flex items-center">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-center">
+                                                        <p class="text-base font-medium">Payment Method</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-64">
+                                                    <div class="py-2 w-full ml-5 flex items-center gap-1">
+                                                        <img src={item.payment_method === 'Transfer Bank'
+                                                            ? '/bca.png'
+                                                            : '/cod.png'} class="w-16 " alt="">
+                                                        <p class="text-base font-semibold"> {item?.payment_method}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {#if item.payment_method === 'Transfer Bank'}                  
+                                                <div class="flex">
+                                                    <div class="flex-none w-32">
+                                                        <div class="py-2 w-full flex items-start">
+                                                            <p class="text-base font-medium">Rekening Number</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-initial w-5">
+                                                        <div class="py-2 mt-1">                        
+                                                            <p class="text-sm font-semibold">: </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex-initial w-80">
+                                                        <div class="py-2 w-full ml-5 flex items-start">
+                                                            <p class="text-base font-semibold text-red-500">{item?.payment_method === 'Transfer Bank' ? item?.no_rek : ''}  <span class="text-black">{item.payment_method === 'Transfer Bank' ? '': '' } </span></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {/if}
+                                        </div>
+                                        <div class="col-span-2">
+                                            <div class="flex">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-start">
+                                                        <p class="text-base font-medium">Shipping Cost</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-32">
+                                                    <div class="py-2 w-full ml-5 flex items-start">
+                                                        <p class="text-base font-semibold">{`Rp ${Number(item.shipping_cost).toLocaleString('id-ID')}`}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="flex">
+                                                <div class="flex-none w-32">
+                                                    <div class="py-2 w-full flex items-start">
+                                                        <p class="text-base font-medium">Total</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-5">
+                                                    <div class="py-2 mt-1">                        
+                                                        <p class="text-sm font-semibold">: </p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-initial w-32">
+                                                    <div class="py-2 w-full ml-5 flex items-start">
+                                                        <p class="text-xl font-semibold text-red-500">{`Rp ${Number(parseFloat(item.total_price)).toLocaleString('id-ID')}`}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        
+                                        </div>
+                                    </div>
+                                
+                                </div>
                         {/each}
                     {/if}
                     {:else}
