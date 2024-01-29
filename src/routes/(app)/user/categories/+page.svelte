@@ -1,4 +1,45 @@
-<script></script>
+<script>
+	import { onMount } from 'svelte';
+	import { dataAPI } from '$utils/axios';
+	import Pagination from '$components/Pagination.svelte';
+	import Swal from 'sweetalert2';
+	const url_API = import.meta.env.VITE_API_SOCK;
+	import { countCartBadge } from '$components/countCartBadge';
+	import { updateCartCountUI } from '$components/countCartBadge';
+
+
+	let page = parseInt(1),
+		total,
+		products = null,
+		province = '';
+
+	async function getProduct() {
+		try {
+			const res = await dataAPI.get(`/products/customer/all?page=${page}&record=10`);
+			products = res.data.data;;
+			total = res.data.pagination.totalPage;
+
+			// console.log(products);
+		} catch (error) {
+			console.log(error);
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops!',
+				confirmButtonColor: '#596066',
+				customClass: 'swal-height',
+				text: 'An error occurred while fetching data'
+			});
+		}
+	}
+
+	onMount(async () => {
+		await getProduct();
+		const initialCartCount = await countCartBadge();
+    	updateCartCountUI(initialCartCount);
+		
+	});
+</script>
+
 
 <div class="container lg mx-auto">
 	<h1 class="text-xl font-belanosima d-flex justify-center mt-4">CATEGORIES</h1>

@@ -4,8 +4,10 @@
 	import Swal from 'sweetalert2';
 	import { goto } from '$app/navigation';
 	import { dataAPI } from '../routes/utils/axios';
-	import { countCartBadge } from '../routes/(app)/user/product/countCartBadge';
-	import { updateCartCountUI } from '../routes/(app)/user/product/countCartBadge';
+	import { countCartBadge } from '$components/countCartBadge';
+	import { updateCartCountUI } from '$components/countCartBadge';
+	import moment from 'moment';
+
 
 	const url_API = import.meta.env.VITE_API_DIGITAL;
 	let user_id = '',
@@ -38,8 +40,55 @@
 		goto('/login');
 	}
 
+	let pages = parseInt(1),
+		total,
+		address = [],
+		province = '';
+
+	async function getAddress() {
+		try {
+			const res = await dataAPI.get(`/address?page=${pages}&record=10`);
+			address = res.data.data;;
+			total = res.data.pagination.totalPage;
+
+		} catch (error) {
+			console.log(error);
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Something went wrong!',
+			});
+		}
+	}
+
+	async function getDistrict() {
+		try {
+			const res = await dataAPI.get(`/address?page=${pages}&record=10`);
+			address = res.data.data;;
+			total = res.data.pagination.totalPage;
+
+		} catch (error) {
+			console.log(error);
+			await Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Something went wrong!',
+			});
+		}
+	}
+
+	const handlePageChange = (e) => {
+		pages = e.detail;
+		getProduct();
+	};
+
+	let showModal1 = true;
+ 	let showModal2 = false;
+
 	onMount(async () => {
+		
 		await countCartBadge();
+		await getAddress();
 		user_id = localStorage.getItem('user_id');
 		usernname = localStorage.getItem('usernname');
 		userRoles = localStorage.getItem('userRoles');
@@ -50,6 +99,7 @@
 	
 			updateCartCountUI();
 		} 
+		
 		// console.log(cartCount);
 		// if (!localStorage.getItem('token')) goto('/');
 
@@ -175,9 +225,10 @@
 									</button>
 									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
 										
-										<li><a class="dropdown-item hover:bg-gray-300" href="#!">Edit Profile</a></li>
+										<li><button class="dropdown-item focus:text-black focus:bg-transparent" data-bs-toggle="modal" data-bs-target="#staticBackdropProfile" >Update Profile</button></li>
+										<li><button class="dropdown-item focus:text-black focus:bg-transparent" data-bs-toggle="modal" data-bs-target="#staticBackdropAddress">Address Book</button></li>
 										<li>
-											<a class="dropdown-item hover:bg-gray-300" href="#!" on:click={logoutHandler}
+											<a class="dropdown-item focus:text-black focus:bg-transparent" href="/login" on:click={logoutHandler}
 												>Logout</a
 											>
 										</li>
@@ -311,6 +362,194 @@
 		</div>
 	</div>
 </nav>
+
+
+<div class="modal fade" id="staticBackdropAddress" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title font-bold text-xl" id="staticBackdropLabel">Address Book</h1>
+        <button type="button" data-bs-dismiss="modal" aria-label="Close" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+			<span class="sr-only">Close menu</span>
+				<svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>
+      </div>
+      <div class="modal-body">
+		<div class="flex justify-between items-center mb-3">
+			<h3 class="text-base font-semibold text-gray-900">My Address</h3>
+			<button class="rounded-md bg-red-500 px-2 py-2 text-white focus:outline-none focus:shadow-outline" data-bs-toggle="modal" data-bs-target="#AddModal">Add Address</button>
+		</div>
+		{#each address as post }
+			<div class="border-2 border-gray-200 rounded-lg px-3 py-2 mb-2">
+				<div class="flex items-center ">
+					{#if post?.add_mark_default === 'default'}
+						<input 
+							id="default-radio-1" 
+							type="radio" 
+							value="" 
+							name="default-radio" 
+							class="w-4 h-4 text-red-500 bg-gray-100 border-gray-300 focus:ring-red-500 "
+							checked
+						>
+					{/if}
+					<label for="default-radio-1" class="ms-2 text-base font-semibold text-gray-900 ">{post?.add_personal_name} - {post?.add_mark}</label>
+				</div>
+				<div class="px-4 flex justify-between">
+					<h4 class="font-medium text-sm text-gray-900">{post?.add_address} ({post?.add_detail_address})</h4>
+					<h4 class="font-semibold text-sm text-gray-900">{moment(post?.add_created_at).format('MMMM Do YYYY, h:mm:ss a')}</h4>
+				</div>
+				<div class="px-4">
+					<h4 class="font-semibold text-sm mt-1 text-gray-900">Mobile - <span class="text-red-500">081577384766</span></h4>
+				</div>
+				<div class="flex items-center gap-2 mt-2 px-4">
+					<button
+						id="handleDelete"
+						class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
+					>
+						Remove
+					</button>
+					<button
+						id="handleDelete"
+						class="w-28  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
+					>
+						Update
+					</button>
+					{#if !post?.add_mark_default === 'defaul'}	
+						<button
+							id="handleDelete"
+							class="w-36  font-base  h-9 mt-2 mb-3 rounded-md border text-black font-base text-sm hover:underline  hover:bg-slate-50"
+						>
+							Main Address
+						</button>
+					{/if}
+				</div>
+			</div>
+		{/each}
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="AddModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-bold" id="exampleModalLabel">Add Address</h5>
+		<button type="button" data-bs-dismiss="modal" aria-label="Close" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+			<span class="sr-only">Close menu</span>
+				<svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+			</svg>
+		</button>
+      </div>
+	  <form >
+		<div class="modal-body">
+				<div class="grid grid-cols-2 gap-4">
+					<div class="mb-3">
+						<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Personal Name</label>
+						<input type="text" id="product-input" placeholder="Please input your personal name" 												
+						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+					</div>
+					<div class="mb-3">
+						<label for="product-input" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Phone Number </label>
+						<input type="number" id="quantiy-input" placeholder="Please input your mobile number" 
+						class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+					</div>
+					
+				</div>
+
+				<div class="grid grid-cols-2 gap-4">
+					<div class="mb-3">
+						<label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select your Province</label>
+						<select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+
+							<option>United States</option>
+							<option>Canada</option>
+							<option>France</option>
+							<option>Germany</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select your City</label>
+						<select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+
+							<option>United States</option>
+							<option>Canada</option>
+							<option>France</option>
+							<option>Germany</option>
+						</select>
+					</div>
+
+				</div>
+
+				<div class="grid grid-cols-2 gap-4">
+					<div class="mb-3">
+						<label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select your District</label>
+						<select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+
+							<option>United States</option>
+							<option>Canada</option>
+							<option>France</option>
+							<option>Germany</option>
+						</select>
+					</div>
+					<div class="mb-3">
+						<label for="countries" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select your Village</label>
+						<select id="countries" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+
+							<option>United States</option>
+							<option>Canada</option>
+							<option>France</option>
+							<option>Germany</option>
+						</select>
+					</div>
+
+					
+				</div>
+
+				<div class="grid grid-cols-2 gap-4">
+					<div class="mb-3">						
+						<label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
+						<textarea id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 " placeholder="Write your thoughts here..."></textarea>
+					</div>
+					<div class="mb-3">						
+						<label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Detail Address</label>
+						<textarea id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 " placeholder="Write your thoughts here..."></textarea>
+					</div>
+				</div>
+
+				<div class="grid grid-cols-2 gap-4">
+					<div class="mb-3">
+						<label for="website-admin" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mark</label>
+						<div class="flex">
+							<span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-e-0 border-gray-300 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+							<svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+								<path fill-rule="evenodd" d="M11.3 3.3a1 1 0 0 1 1.4 0l6 6 2 2a1 1 0 0 1-1.4 1.4l-.3-.3V19a2 2 0 0 1-2 2h-3a1 1 0 0 1-1-1v-3h-2v3c0 .6-.4 1-1 1H7a2 2 0 0 1-2-2v-6.6l-.3.3a1 1 0 0 1-1.4-1.4l2-2 6-6Z" clip-rule="evenodd"/>
+							</svg>
+							</span>
+							<input type="text" id="website-admin" class="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  " placeholder="Please add your mark address">
+							
+						</div>
+						<div class="flex items-center mt-3">
+							<input id="default-checkbox" type="checkbox" value="" class="w-4 h-4 text-red-500 bg-gray-100 border-gray-300 rounded focus:ring-red-500 ">
+							<label for="default-checkbox" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Make it the main address</label>
+						</div>
+					</div>
+					
+				</div>
+		</div>
+		<div class="modal-footer">
+			<button data-bs-dismiss="modal" aria-label="Close" class="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-md text-sm px-3 py-2 text-center mr-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800" >Cancel</button>
+			<button type="submit" class="focus:outline-none text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:ring-red-300 font-medium rounded-md text-sm px-3 py-2 mr-2 mb-2 dark:bg-red-400 dark:hover:bg-red-500 dark:focus:ring-red-900" >Save Address</button>
+		</div>
+	</form>
+    </div>
+  </div>
+</div>
+
 
 <style>
 

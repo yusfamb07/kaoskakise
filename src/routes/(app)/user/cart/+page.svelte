@@ -115,12 +115,13 @@
 		const selectedValue = event.target.value.split(',');
 		// console.log(selectedValue[1]);
 			formData.value = parseInt(selectedValue);
+			
 
 			const selectedOption = data_ongkirs.find(option => option.value === Number(selectedValue[0]));
 			if (selectedOption) {
 				formData.etd = selectedOption.etd;
 				formData.description = selectedOption.description;
-				console.log(formData.description);
+				// console.log(formData.description);
 			}
 		try {
 			const response = await dataAPI.get(`/carts/checkout/${user_id}`);
@@ -384,19 +385,29 @@
 <div
 	class="modal fade"
 	id="checkoutModal"
-	tabindex="-1"
-	aria-labelledby="exampleModalLabel"
+	data-bs-backdrop="static" 
+	data-bs-keyboard="false" 
+	tabindex="-1" 
+	aria-labelledby="staticBackdropLabel" 
 	aria-hidden="true"
 >
 	<div class="modal-dialog modal-dialog-scrollable modal-xl">
 		<div class="modal-content">
+			
 			<div class="modal-body">
 				<table class="w-full rounded  text-left mt-3">
 					<thead class="text-base text-black border-dark border-bottom" >
 						<tr>
 							<th scope="col" class="font-semibold w-60 px-2 py-2 text-base bg-white"> SHIPPING ADDRESS </th>
 							<th scope="col" class="w-auto bg-white" />
-							<th scope="col" class="w-30 bg-white" />
+							<th scope="col" class="w-30 bg-white flex justify-end" >
+								<button type="button" data-bs-dismiss="modal" aria-label="Close" class="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+									<span class="sr-only">Close menu</span>
+										<svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+									</svg>
+								</button>
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -512,12 +523,20 @@
 					</div>
 					<div class="col-span-2 flex justify-start gap-2">
 						{#each data_payment as data }
-							
-							<button class="bg-gray-50  border-2 border-gray-200  text-sm rounded-lg text-black  hover:bg-gray-200  focus:outline-none  focus:bg-gray-200 font-medium  px-4 py-1.5 text-center mr-2 mb-2 " 
-								on:click={() => {
+							{#if data?.payment_name === 'Transfer Bank'}
+								<button type="button" class="text-white bg-[#0060af] hover:bg-[#0060af]/90 focus:ring-4 focus:ring-[#0060af]/50 focus:outline-none font-medium rounded-lg text-sm px-4 py-2 text-center inline-flex items-center" on:click={() => {
 								handleClick(data.payment_name);}}>
-								{data?.payment_name}
-							</button>
+								<img src='/bcapay.png' class="w-14 " alt="">
+									Pay with BCA
+								</button>
+							{:else}
+								<button type="button" class="text-white bg-[#ff541c] hover:bg-[#ff541c]/80 focus:ring-4 focus:outline-none focus:ring-[#ff541c]/50 font-medium rounded-lg text-sm px-4 py-2 text-center inline-flex items-center"  on:click={() => {
+								handleClick(data.payment_name);}}>
+								<img src='/codpay.png' class="w-14 " alt="">
+									Pay with COD
+								</button>
+
+							{/if}
 						{/each}
 						<!-- <button type="button" class="text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:focus:ring-gray-500 mr-2 mb-2">
 						
@@ -559,9 +578,8 @@
 						data-bs-toggle="modal"
 						data-bs-target="#paymentModal"
 						on:click={handlePayment}
-						class=" w-full rounded-md bg-red-500 text-white font-semibold text-base h-9 mt-3 mb-3"
-						>MAKE AN ORDER</button
-					>
+						class=" w-full rounded-md bg-red-500 text-white font-semibold text-base h-9 mt-3 mb-3 disabled:opacity-70"
+						>MAKE AN ORDER</button>
 				</div>
 
 
@@ -573,9 +591,12 @@
 <div
 	class="modal fade"
 	id="paymentModal"
-	tabindex="-1"
-	aria-labelledby="exampleModalLabel"
+	data-bs-backdrop="static" 
+	data-bs-keyboard="false" 
+	tabindex="-1" 
+	aria-labelledby="staticBackdropLabel" 
 	aria-hidden="true"
+	
 >
 	<div class="modal-dialog modal-dialog-scrollable">
 		<div class="modal-content">
@@ -587,7 +608,9 @@
 				<hr class="mt-2" />
 				{#if fopa_payment === 'Transfer Bank'}	
 					<div class="grid grid-cols-2 gap-2">
-							<div><img src="/bca.png" class="w-44" alt=""></div>
+							<div class="mt-4">
+								<img src="/bca.png" class="w-44" alt="">
+							</div>
 							<div>
 								<p class="font-medium text-sm whitespace-normal mt-4">No. Rekening</p>
 								<div class="flex justify-start gap-2">

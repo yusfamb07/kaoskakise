@@ -4,8 +4,8 @@
 	import Pagination from '$components/Pagination.svelte';
 	import Swal from 'sweetalert2';
 	const url_API = import.meta.env.VITE_API_SOCK;
-	import { countCartBadge } from './countCartBadge';
-	import { updateCartCountUI } from './countCartBadge';
+	import { countCartBadge } from '$components/countCartBadge';
+	import { updateCartCountUI } from '$components/countCartBadge';
 
 	let page = parseInt(1),
 		total,
