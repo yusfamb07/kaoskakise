@@ -81,17 +81,20 @@
   };
 
   onMount(() => {
-    const token = localStorage.getItem("token"),
-      role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decodedUser = decodeJwt(token);
+      const role = decodedUser.roleType;
 
-    if (token && role) {
-      switch (role) {
-        case "admin":
-          goto("/admin/dashboard");
-          break;
-        default:
-          goto("/user/dashboard");
-          break;
+      if (token && role) {
+        switch (role) {
+          case "admin":
+            goto("/admin/dashboard");
+            break;
+          default:
+            goto("/user/dashboard");
+            break;
+        }
       }
     }
   });

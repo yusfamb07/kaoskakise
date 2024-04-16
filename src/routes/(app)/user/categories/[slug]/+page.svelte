@@ -7,21 +7,20 @@
   import { countCartBadge } from "$components/countCartBadge";
   import { updateCartCountUI } from "$components/countCartBadge";
   import { Alert } from "flowbite-svelte";
+  import { page } from "$app/stores";
 
-  let page = parseInt(1),
-    total,
-    products = null,
-    province = "";
+  let slug = $page.params.slug;
 
-  async function getProduct() {
+  let detailcategories = [];
+  let products = [];
+  let namecategories = "";
+  async function fetchDetailCategories() {
     try {
-      const res = await dataAPI.get(
-        `/products/customer/all?page=${page}&record=10`
-      );
-      products = res.data.data;
-      total = res.data.pagination.totalPage;
-
-      // console.log(products);
+      const response = await dataAPI.get(`/categories/customer/${slug}`);
+      detailcategories = response.data.data;
+      products = response.data.data.products;
+      namecategories = response.data.data.cate_name;
+      console.log(detailcategories);
     } catch (error) {
       console.log(error);
       await Swal.fire({
@@ -179,104 +178,68 @@
   }
 
   onMount(async () => {
-    await getProduct();
+    await fetchDetailCategories();
     const initialCartCount = await countCartBadge();
     updateCartCountUI(initialCartCount);
   });
 </script>
 
 <div class="container lg mx-auto">
-  <h1 class="text-xl font-belanosima d-flex justify-center mt-4">
-    ALL PRODUCT
+  <h1 class="text-xl font-belanosima flex justify-center mt-4 gap-4">
+    <a href="/user/categories/">
+      <svg
+        class="w-6 h-6 text-gray-800 dark:text-white"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M13.729 5.575c1.304-1.074 3.27-.146 3.27 1.544v9.762c0 1.69-1.966 2.618-3.27 1.544l-5.927-4.881a2 2 0 0 1 0-3.088l5.927-4.88Z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </a>
+    {namecategories}
   </h1>
   <div class="flex justify-center">
     <div class="border-b border-black border-1 w-36"></div>
   </div>
-  <div class="d-flex justify-center">
-    <form on:submit|preventDefault={searchProducts} class="w-full max-w-sm">
-      <div class="flex items-center border-b border-black py-2">
-        <input
-          class="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
-          type="text"
-          placeholder="Search "
-          aria-label="Search"
-          bind:value={search}
-          on:keyup={handleSearchSubmitEnter}
-        />
-        <button
-          class="flex-shrink-0 bg-black text-sm text-white py-1 px-2 rounded"
-          type="submit"
-        >
-          Search
-        </button>
-      </div>
-    </form>
-  </div>
-  <div class="d-flex justify-center mt-3">
-    <div class="dropdown">
-      <button
-        class="btn bg-black text-white text-sm dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton1"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
+
+  <div class="grid lg:grid-cols-4 sm:grid-cols-2 gap-5 mt-4">
+    {#each products as post}
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <div
+        class="card border-none cursor-pointer"
+        data-bs-toggle="modal"
+        data-bs-target="#DetailProduct"
+        data-prod-id={post?.prod_id}
+        on:click={fetchDetailProduct}
       >
-        Sort By
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        <li><a class="dropdown-item" href="!#">Price (Low to High)</a></li>
-        <li><a class="dropdown-item" href="!#">Price (High to Low)</a></li>
-        <li><a class="dropdown-item" href="!#">Date (New to Old)</a></li>
-      </ul>
-    </div>
-  </div>
-
-  {#if products}
-    <div class="grid lg:grid-cols-4 sm:grid-cols-2 gap-5 mt-4">
-      {#each products as post}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div
-          class="card border-none cursor-pointer"
-          data-bs-toggle="modal"
-          data-bs-target="#DetailProduct"
-          data-prod-id={post?.prod_id}
-          on:click={fetchDetailProduct}
-        >
-          <img
-            src={post.prod_image
-              ? `${url_API}/products/image/${post?.prod_image}`
-              : "/product-default.png"}
-            class="w-80 h-72"
-            alt=""
-          />
-          <!-- <img src="/product.png" class="card-img-top " alt="..." /> -->
-          <div class="card-body">
-            <h1
-              class="card-title text-2xl font-nats font-semibold leading-6 text-center"
-            >
-              {post?.prod_name}
-            </h1>
-            <p class=" text-lg text-center font-medium">
-              {`Rp ${Number(post.prod_price).toLocaleString("id-ID")}`}
-            </p>
-          </div>
+        <img
+          src={post.prod_image
+            ? `${url_API}/products/image/${post?.prod_image}`
+            : "/product-default.png"}
+          class="w-80 h-72"
+          alt=""
+        />
+        <!-- <img src="/product.png" class="card-img-top " alt="..." /> -->
+        <div class="card-body">
+          <h1
+            class="card-title text-2xl font-nats font-semibold leading-6 text-center"
+          >
+            {post?.prod_name}
+          </h1>
+          <p class=" text-lg text-center font-medium">
+            {`Rp ${Number(post.prod_price).toLocaleString("id-ID")}`}
+          </p>
         </div>
-      {/each}
-    </div>
-  {:else}
-    <div class="flex justify-center items-center mt-5 mb-5">
-      <div class="custom-loader" />
-      <h3 class="text-black load-title text-xl">Loading....</h3>
-    </div>
-  {/if}
-
-  <div class="div">
-    <Pagination
-      currentPage={page}
-      totalPages={total}
-      on:currentPageChange={handlePageChange}
-    />
+      </div>
+    {/each}
   </div>
 </div>
 

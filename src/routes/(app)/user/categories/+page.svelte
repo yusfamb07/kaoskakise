@@ -1,79 +1,98 @@
 <script>
-	import { onMount } from 'svelte';
-	import { dataAPI } from '$utils/axios';
-	import Pagination from '$components/Pagination.svelte';
-	import Swal from 'sweetalert2';
-	const url_API = import.meta.env.VITE_API_SOCK;
-	import { countCartBadge } from '$components/countCartBadge';
-	import { updateCartCountUI } from '$components/countCartBadge';
+  import { onMount } from "svelte";
+  import { dataAPI } from "$utils/axios";
+  import Pagination from "$components/Pagination.svelte";
+  import Swal from "sweetalert2";
+  const url_API = import.meta.env.VITE_API_SOCK;
+  import { countCartBadge } from "$components/countCartBadge";
+  import { updateCartCountUI } from "$components/countCartBadge";
 
+  let page = parseInt(1),
+    total,
+    categories = [],
+    province = "";
 
-	let page = parseInt(1),
-		total,
-		products = null,
-		province = '';
+  async function getCategories() {
+    try {
+      const res = await dataAPI.get(
+        `/categories/customer/all?page=${page}&record=10`
+      );
+      categories = res.data.data;
+      total = res.data.pagination.totalPage;
 
-	async function getProduct() {
-		try {
-			const res = await dataAPI.get(`/products/customer/all?page=${page}&record=10`);
-			products = res.data.data;;
-			total = res.data.pagination.totalPage;
+      // console.log(products);
+    } catch (error) {
+      console.log(error);
+      await Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        confirmButtonColor: "#596066",
+        customClass: "swal-height",
+        text: "An error occurred while fetching data",
+      });
+    }
+  }
 
-			// console.log(products);
-		} catch (error) {
-			console.log(error);
-			await Swal.fire({
-				icon: 'error',
-				title: 'Oops!',
-				confirmButtonColor: '#596066',
-				customClass: 'swal-height',
-				text: 'An error occurred while fetching data'
-			});
-		}
-	}
-
-	onMount(async () => {
-		await getProduct();
-		const initialCartCount = await countCartBadge();
-    	updateCartCountUI(initialCartCount);
-		
-	});
+  onMount(async () => {
+    await getCategories();
+    const initialCartCount = await countCartBadge();
+    updateCartCountUI(initialCartCount);
+  });
 </script>
 
-
 <div class="container lg mx-auto">
-	<h1 class="text-xl font-belanosima d-flex justify-center mt-4">CATEGORIES</h1>
-	<div class="flex justify-center ">
-		<div class="border-b border-black border-1  w-32 "></div>
-	</div>
-
-	<div class="grid lg:grid-cols-3 sm:grid-cols-1 gap-4 mt-4">
-		<div class="card border-none">
-			<img src="/active.jpg" class="card-img-top lg: w-100 lg:h-auto sm:: w-20 sm:h-auto" alt="..." />
-			<div class=" bg-black h-35">
-				<h1 class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2">
-					Active Sock
-				</h1>
-			</div>
-		</div>
-		<div class="card border-none">
-			<img src="/triball.jpg" class="card-img-top" alt="..." />
-			<div class=" bg-black h-35">
-				<h1 class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2">
-					Tribal Sock
-				</h1>
-			</div>
-		</div>
-		<div class="card border-none">
-			<img src="/classic.jpg" class="card-img-top" alt="..." />
-			<div class=" bg-black h-35">
-				<h1 class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2">
-					Classic Sock
-				</h1>
-			</div>
-		</div>
-	</div>
-	<!-- <div class="grid grid-cols-4 gap-4 mt-4">
+  <h1 class="text-xl font-belanosima d-flex justify-center mt-4">CATEGORIES</h1>
+  <div class="flex justify-center">
+    <div class="border-b border-black border-1 w-32"></div>
+  </div>
+  <div class="grid lg:grid-cols-3 sm:grid-cols-1 gap-4 mt-4">
+    {#each categories as item}
+      <a href="/user/categories/{item.cate_id}">
+        <div class="card border-none">
+          <!-- <img
+			src="/active.jpg"
+			class="card-img-top lg: w-100 lg:h-auto sm:: w-20 sm:h-auto"
+			alt="..."
+		  /> -->
+          <img
+            src={item?.cate_image
+              ? `${url_API}/products/image/${item?.cate_image}`
+              : "/product-default.png"}
+            class="card-img-top lg: w-100 lg:h-auto sm:: w-20 sm:h-auto"
+            alt=""
+          />
+          <div class=" bg-black h-35">
+            <h1
+              class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2"
+            >
+              {item?.cate_name}
+            </h1>
+          </div>
+        </div>
+      </a>
+      <!-- <div class="card border-none">
+      <img src="/triball.jpg" class="card-img-top" alt="..." />
+      <div class=" bg-black h-35">
+        <h1
+          class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2"
+        >
+          Tribal Sock
+        </h1>
+      </div>
+    </div>
+    <div class="card border-none">
+      <img src="/classic.jpg" class="card-img-top" alt="..." />
+      <div class=" bg-black h-35">
+        <h1
+          class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2"
+        >
+          Classic Sock
+        </h1>
+      </div>
+    </div> -->
+    {/each}
+  </div>
+  <!-- <div class="grid grid-cols-4 gap-4 mt-4">
 		<div class="card border-none">
 			<img src="/product.png" class="card-img-top" alt="..." />
 			<div class="card-body">
@@ -150,7 +169,7 @@
 		</div>
 	</div> -->
 
-	<!-- <div class="lightbox">
+  <!-- <div class="lightbox">
 		<div class="row">
 			<div class="col-lg-4 col-md-12 mb-4 mb-lg-0">
 				<img
@@ -199,26 +218,4 @@
 </div>
 
 <style>
-	.carousel-control-prev-icon,
-	.carousel-control-next-icon {
-		height: 35px;
-		width: 35px;
-		outline: black;
-		background-size: 100%, 100%;
-		border-radius: 50%;
-		background-image: none;
-		background-color: black;
-	}
-
-	.carousel-control-next-icon:after {
-		content: '>';
-		font-size: 20px;
-		color: white;
-	}
-
-	.carousel-control-prev-icon:after {
-		content: '<';
-		font-size: 20px;
-		color: white;
-	}
 </style>
