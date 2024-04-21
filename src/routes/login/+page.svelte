@@ -13,74 +13,98 @@
   let isUsername = false;
   let isWarning = false;
   let inputPasswordRef;
-  const handleLogin = () => {
-    var encryptedUsername = AES256.encrypt(username, url_AES);
-    var encryptedPassword = AES256.encrypt(password, url_AES);
 
-    const user = localStorage.getItem("user");
-    fetch(`${url_API}/auth/signin`, {
-      method: "POST",
-      body: JSON.stringify({
-        username: encryptedUsername,
-        password: encryptedPassword,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then(async (response) => {
-        if (response.statusText === "OK") {
-          const result = await response.json();
-          localStorage.setItem("token", result.token);
-
-          const decodedUser = decodeJwt(result.token);
-
-          const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-              toast.addEventListener("mouseenter", Swal.stopTimer);
-              toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-          });
-
-          Toast.fire({
-            icon: "success",
-            title: "Signed in successfully",
-          });
-
-          switch (decodedUser.roleType) {
-            case "admin":
-              goto("/admin/dashboard");
-              break;
-
-            default:
-              goto("/user/dashboard");
-              break;
-          }
-        } else {
-          isWarning = true;
-          setTimeout(() => {
-            isWarning = false;
-          }, 2000);
-          await Swal.fire({
-            icon: "error",
-            title: "Password incorrect",
-            confirmButtonColor: "#596066",
-            customClass: "swal-height",
-            confirmButtonText: "Back to Login",
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
+  async function fetchXSRF() {
+    try {
+      const response = await fetch(url_API + "/csrf/get-csrf-token", {
+        method: "GET",
       });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.csrfToken);
+        return data.csrfToken;
+      } else {
+        throw new Error("Failed to fetch XSRF token");
+      }
+    } catch (error) {
+      console.error("Error fetching XSRF token:", error);
+      throw error; // Propagate the error to the caller
+    }
+  }
+
+  const handleLogin = async () => {
+    try {
+      var encryptedUsername = AES256.encrypt(username, url_AES);
+      var encryptedPassword = AES256.encrypt(password, url_AES);
+
+      const CSRFToken = await fetchXSRF(); // Wait for the XSRF token
+
+      const response = await fetch(`${url_API}/auth/signin`, {
+        method: "POST",
+        body: JSON.stringify({
+          username: encryptedUsername,
+          password: encryptedPassword,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Csrf-Token": CSRFToken, // Include CSRF token in the headers
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        localStorage.setItem("token", result.token);
+
+        const decodedUser = decodeJwt(result.token);
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+
+        Toast.fire({
+          icon: "success",
+          title: "Signed in successfully",
+        });
+
+        switch (decodedUser.roleType) {
+          case "admin":
+            goto("/admin/dashboard");
+            break;
+
+          default:
+            goto("/user/dashboard");
+            break;
+        }
+      } else {
+        isWarning = true;
+        setTimeout(() => {
+          isWarning = false;
+        }, 2000);
+        await Swal.fire({
+          icon: "error",
+          title: "Password incorrect",
+          confirmButtonColor: "#596066",
+          customClass: "swal-height",
+          confirmButtonText: "Back to Login",
+        });
+      }
+    } catch (error) {
+      console.log("Login error:", error);
+      // Handle login error, e.g., show a generic error message to the user
+    }
   };
 
   onMount(() => {
+    // fetchXSRF();
     const token = localStorage.getItem("token");
     if (token) {
       const decodedUser = decodeJwt(token);

@@ -33,7 +33,7 @@
   // Function to fetch XSRF token from the server
   async function fetchXSRF() {
     try {
-      const response = await fetch(url_API_XSRF + "/token-csrf", {
+      const response = await fetch(url_API + "/csrf/get-csrf-token", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -41,9 +41,10 @@
         },
       });
 
-      if (response.ok) {
+      if (response.status === 500) {
         const data = await response.json();
-        return data.XSRFToken;
+        console.log(data.csrfToken);
+        return data.csrfToken;
       } else {
         throw new Error("Failed to fetch XSRF token");
       }
