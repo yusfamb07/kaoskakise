@@ -3,7 +3,6 @@
   import { dataAPI } from "$utils/axios";
   import Pagination from "$components/Pagination.svelte";
   // import Ckeditor from '$components/Ckeditor.svelte';
-  import SvelteQuill from "svelte-quill";
   import "quill/dist/quill.snow.css"; // Quill CSS
   import Swal from "sweetalert2";
   import Ckeditor from "$components/Ckeditor.svelte";
@@ -52,6 +51,25 @@
     prod_image = event.target.files[0];
   };
 
+  async function fetchXSRF() {
+    try {
+      const response = await fetch(url_API + "/csrf/get-csrf-token", {
+        method: "GET",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.csrfToken);
+        return data.csrfToken;
+      } else {
+        throw new Error("Failed to fetch XSRF token");
+      }
+    } catch (error) {
+      console.error("Error fetching XSRF token:", error);
+      throw error; // Propagate the error to the caller
+    }
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formDataUpload = new FormData();
@@ -63,9 +81,17 @@
     formDataUpload.append("prod_weight", formData.prod_weight);
     formDataUpload.append("prod_image", prod_image);
 
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     // console.log(formDataUpload);
     try {
-      const response = await dataAPI.post(`/products/store`, formDataUpload);
+      const response = await dataAPI.post(`/products/store`, formDataUpload, {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+      });
       if (response.status === 200) {
         await Swal.fire({
           icon: "success",
@@ -146,11 +172,20 @@
     // console.log(formData);
 
     const { prodId } = event.currentTarget.dataset;
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
 
     try {
       const response = await dataAPI.post(
         `/products/update/${prodId}`,
-        formData
+        formData,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
 
       if (response.status === 200) {

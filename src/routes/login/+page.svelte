@@ -22,7 +22,6 @@
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data.csrfToken);
         return data.csrfToken;
       } else {
         throw new Error("Failed to fetch XSRF token");
@@ -48,13 +47,13 @@
         }),
         headers: {
           "Content-Type": "application/json",
-          "X-Csrf-Token": CSRFToken, // Include CSRF token in the headers
+          "X-CSRF-Token": CSRFToken, // Include CSRF token in the headers
         },
       });
-
       if (response.ok) {
         const result = await response.json();
         localStorage.setItem("token", result.token);
+        localStorage.setItem("csrftoken", CSRFToken);
 
         const decodedUser = decodeJwt(result.token);
 
