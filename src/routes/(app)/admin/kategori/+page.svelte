@@ -29,7 +29,10 @@
 
   async function searchCategories() {
     categories = null;
-
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const res = await fetch(
         `${url_API}/categories/admin/searchCategories/?page=${page}&record=10`,
@@ -42,6 +45,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }
       ).then((res) => res.json());
@@ -77,11 +81,19 @@
     formDataUpload.append("cate_name", cate_name);
     formDataUpload.append("cate_image", cate_image.files[0]);
 
-    console.log(formDataUpload);
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await dataAPI.post(
         `/categories/admin/store`,
-        formDataUpload
+        formDataUpload,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
       if (response.status === 200) {
         await Swal.fire({
@@ -90,7 +102,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
+        // location.reload();
+        await fetchCategories();
       }
     } catch (error) {
       await Swal.fire({
@@ -132,11 +145,20 @@
     formDataWithFile.append("cate_image", cate_image_update.files[0]);
 
     const { cateId } = event.currentTarget.dataset;
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
 
     try {
       const response = await dataAPI.post(
         `/categories/admin/edit/${cateId}`,
-        formDataWithFile
+        formDataWithFile,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
 
       if (response.status === 200) {
@@ -146,7 +168,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
+        // location.reload();
+        await fetchCategories();
       } else {
         await Swal.fire({
           icon: "error",

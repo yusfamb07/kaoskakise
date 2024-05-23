@@ -58,12 +58,12 @@
             src={item?.cate_image
               ? `${url_API}/products/image/${item?.cate_image}`
               : "/product-default.png"}
-            class="card-img-top lg: w-100 lg:h-auto sm:: w-20 sm:h-auto"
+            class="card-img-top w-100 h-80"
             alt=""
           />
           <div class=" bg-black h-35">
             <h1
-              class="text-2xl font-nats font-black leading-6 text-center text-white px-2 py-2"
+              class="lg:text-2xl sm:text-xs font-nats font-black leading-6 text-center text-white px-2 py-2"
             >
               {item?.cate_name}
             </h1>

@@ -253,7 +253,7 @@
           <!-- <img src="/product.png" class="card-img-top " alt="..." /> -->
           <div class="card-body">
             <h1
-              class="card-title text-2xl font-nats font-semibold leading-6 text-center"
+              class="card-title text-xl font-nats font-semibold leading-6 text-center"
             >
               {post?.prod_name}
             </h1>

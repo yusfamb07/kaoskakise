@@ -342,11 +342,19 @@
     event.preventDefault();
     const formDataWithFile = new FormData();
     formDataWithFile.append("fopa_image_transaction", image_transaction[0]);
-    console.log(formDataWithFile);
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await dataAPI.post(
         `/carts/upload_bukti/${orderId}`,
-        formDataWithFile
+        formDataWithFile,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
       console.log(formDataWithFile);
       if (response.status === 200) {
@@ -380,6 +388,10 @@
     event.preventDefault();
     const { cancelId } = event.currentTarget.dataset;
 
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     Swal.fire({
       title: "Do you want to cancel the order?",
       showCancelButton: true,
@@ -393,6 +405,7 @@
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("token")}`,
+              "X-CSRF-Token": csrfToken,
             },
           });
           Swal.fire("Ypur order has been cancel!", "", "success");
@@ -409,8 +422,17 @@
   let requestTransfer = [];
 
   async function getDetailOrder() {
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
+
     try {
-      const res = await dataAPI.post(`/carts/upload_bukti/${orderId}`);
+      const res = await dataAPI.post(`/carts/upload_bukti/${orderId}`, {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+      });
       requestTransfer = res.data.data;
       // orderId = res.data.data.fopa_id;
     } catch (error) {
@@ -473,10 +495,19 @@
     formDataUpload.append("rat_fopa_id", fopa_id_review);
 
     // console.log(formDataUpload);
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await dataAPI.post(
         `/rating/createRating`,
-        formDataUpload
+        formDataUpload,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
       if (response.status === 200) {
         await Swal.fire({

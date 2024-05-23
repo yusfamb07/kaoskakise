@@ -18,7 +18,7 @@
     description: null,
   };
 
-  $: console.log($page.data.user.user_id);
+  // $: console.log($page.data.user.user_id);
 
   async function countCartPage() {
     // isLoading = true;
@@ -76,7 +76,10 @@
       cart.cart_qty = newCartQty;
 
       // console.log(newCartQty);
-
+      const csrfToken = localStorage.getItem("csrftoken");
+      if (!csrfToken) {
+        throw new Error("CSRF token not found.");
+      }
       try {
         const res = await fetch(`${url_API}/carts/updateCart/${cart.cart_id}`, {
           method: "POST",
@@ -86,6 +89,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }).then((res) => res.json());
 
@@ -149,6 +153,10 @@
   let fopa_payment = null; // Initial value for fopa_payment
 
   const handlePayment = async () => {
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     fetch(`${url_API}/carts/createPayment/${user_id}`, {
       method: "POST",
       body: JSON.stringify({
@@ -159,6 +167,8 @@
       }),
       headers: {
         "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     })
@@ -262,57 +272,51 @@
   });
 </script>
 
-<div class="container lg mx-auto">
-  <h1 class="text-xl font-belanosima d-flex justify-center mt-4">CART</h1>
+<div class="container mx-auto px-4">
+  <h1 class="text-xl font-belanosima text-center mt-4">CART</h1>
   <div class="flex justify-center">
-    <div class="border-b border-black border-1 w-16"></div>
+    <div class="border-b border-black w-16"></div>
   </div>
 
   <div class="grid lg:grid-cols-3 sm:grid-cols-1 gap-3 mt-3">
     <div class="lg:col-span-2 sm:col-span-1">
-      <div class="rounded shadow-md sm:rounded-lg">
+      <div class="rounded shadow-md">
         <table class="w-full text-base text-left text-gray-600 mt-2">
           <thead class="text-sm text-gray-800 uppercase font-bold bg-gray-100">
             <tr>
               <th scope="col" class="px-6 py-3"
                 ><span class="sr-only">Image</span></th
               >
-              <th scope="col" class=" lg:px-6 lg:py-3 sm:px-5 sm:py-2">
-                Product
-              </th>
-              <th scope="col" class=" lg:px-8 lg:py-3 sm:px-7 sm:py-2">
-                Price
-              </th>
-              <th scope="col" class=" px-8 py-3"> Quantity </th>
-              <th scope="col" class=" lg:px-8 lg:py-1 sm:px-7 sm:py-2">
-                Total
-              </th>
-              <th scope="col" class=" px-3 py-3"> Action </th>
+              <th scope="col" class="px-6 py-3">Product</th>
+              <th scope="col" class="px-6 py-3">Price</th>
+              <th scope="col" class="px-6 py-3">Quantity</th>
+              <th scope="col" class="px-6 py-3">Total</th>
+              <th scope="col" class="px-3 py-3">Action</th>
             </tr>
           </thead>
           <tbody>
             {#if carts.length > 0}
               {#each carts as cart}
-                <tr class="bg-white border-bottom">
-                  <td class="">
+                <tr class="bg-white border-b">
+                  <td class="px-3 py-2">
                     <img
                       src={cart?.cart_prod.prod_image
                         ? `${url_API}/products/image/${cart?.cart_prod.prod_image}`
                         : "/product-default.png"}
-                      class="lg:w-52 lg:h-40 sm:w-24 sm:h-20 px-3 py-1"
+                      class="w-24 h-20 lg:w-52 lg:h-40 px-3 py-1"
                       alt=""
                     />
                   </td>
                   <td class="px-3 py-2">
                     <p
-                      class="lg:text-base sm:text-sm font-medium text-gray-900 whitespace-normal flex items-center"
+                      class="text-sm lg:text-base font-medium text-gray-900 whitespace-normal"
                     >
                       {cart?.cart_prod.prod_name}
                     </p>
                   </td>
                   <td class="px-3 py-2">
                     <p
-                      class="lg:text-base sm:text-sm font-medium text-gray-900 whitespace-normal"
+                      class="text-sm lg:text-base font-medium text-gray-900 whitespace-normal"
                     >
                       {`Rp ${Number(cart?.cart_prod.prod_price).toLocaleString("id-ID")}`}
                     </p>
@@ -326,9 +330,7 @@
                           class="w-4 cursor-pointer"
                         />
                       </button>
-                      <p
-                        class="text-base font-xl text-gray-900 whitespace-normal"
-                      >
+                      <p class="text-base text-gray-900 whitespace-normal">
                         {cart.cart_qty}
                       </p>
                       <button on:click={() => TotalQty(true, cart)}>
@@ -338,7 +340,7 @@
                   </td>
                   <td class="px-3 py-2">
                     <p
-                      class="lg:text-base sm:text-sm text-gray-900 whitespace-normal font-semibold"
+                      class="text-sm lg:text-base text-gray-900 whitespace-normal font-semibold"
                     >
                       {`Rp ${Number(calculateTotalCost(cart)).toLocaleString("id-ID")}`}
                     </p>
@@ -347,7 +349,7 @@
                     <a
                       href="#!"
                       on:click={(event) => handleDelete(event, cart?.cart_id)}
-                      class="lg:text-base sm:text-sm font-medium text-red-400 dark:text-red-300 hover:underline"
+                      class="text-sm lg:text-base font-medium text-red-400 hover:underline"
                     >
                       Remove
                     </a>
@@ -356,16 +358,12 @@
               {/each}
             {:else}
               <tr>
-                <td colspan="12">
-                  <div class="flex justify-center items-center">
+                <td colspan="6">
+                  <div class="flex flex-col items-center">
                     <img class="w-48 px-3 py-3" src="/empty-logo.png" alt="" />
-                  </div>
-                  <div class="flex justify-center items-center">
                     <h4 class="text-black text-center text-base font-medium">
                       Data cart is Empty
                     </h4>
-                  </div>
-                  <div class="flex justify-center items-center mb-3">
                     <p class="text-gray-700 text-sm">
                       Please add product to cart
                     </p>
@@ -377,24 +375,23 @@
         </table>
       </div>
     </div>
-    <div class=" rounded-lg bg-gray-100 mb-2 max-h-44 mt-2">
-      <h1 class="font-semibold px-6 py-3 text-base text-black uppercase">
+    <div class="rounded-lg bg-gray-100 mb-2 p-4 mt-2">
+      <h1 class="font-semibold text-base text-black uppercase">
         Total {carts.length} Product
       </h1>
-      <hr />
-      <h1
-        class=" font-semibold px-6 py-3 text-2xl text-gray-900 whitespace-normal"
-      >
+      <hr class="my-2" />
+      <h1 class="font-semibold text-2xl text-gray-900 whitespace-normal">
         {`Rp ${Number(total).toLocaleString("id-ID")}`}
       </h1>
-      <div class="container flex items-end">
+      <div class="flex items-end mt-4">
         <button
           on:click={handleCheckout}
           data-bs-toggle="modal"
           data-bs-target="#checkoutModal"
-          class=" w-full rounded-md bg-red-500 text-white font-semibold text-base h-10 mt-2"
-          >CHECKOUT</button
+          class="w-full rounded-md bg-red-500 text-white font-semibold text-base h-10"
         >
+          CHECKOUT
+        </button>
       </div>
     </div>
   </div>

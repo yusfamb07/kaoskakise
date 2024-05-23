@@ -75,7 +75,7 @@
     const formDataUpload = new FormData();
     formDataUpload.append("prod_name", formData.prod_name);
     formDataUpload.append("prod_price", formData.prod_price);
-    formDataUpload.append("prod_desc", prod_desc);
+    formDataUpload.append("prod_desc", formData.prod_desc);
     formDataUpload.append("prod_cate_id", formData.prod_cate_id);
     formDataUpload.append("prod_stock", formData.prod_stock);
     formDataUpload.append("prod_weight", formData.prod_weight);
@@ -99,7 +99,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
+        // location.reload();
+        await getProduct();
       }
     } catch (error) {
       await Swal.fire({
@@ -117,24 +118,23 @@
 
   async function handleUpdateData(e) {
     const { prodId } = e.currentTarget.dataset;
-    const { default: Quill } = await import("quill");
+    // const { default: Quill } = await import("quill");
 
     try {
       const response = await dataAPI.get(`/products/detailProducts/${prodId}`);
       const updData = response.data.data[0];
-      const prod_desc = updData.prod_desc;
 
       // Initialize Quill first
-      const quill = new Quill(editor, {
-        modules: {
-          toolbar: true,
-        },
-        theme: "snow",
-        placeholder: "Tulis keterangan...",
-      });
+      // const quill = new Quill(editor, {
+      //   modules: {
+      //     toolbar: true,
+      //   },
+      //   theme: "snow",
+      //   placeholder: "Tulis keterangan...",
+      // });
 
-      // Set the default value
-      quill.root.innerHTML = prod_desc;
+      // // Set the default value
+      // quill.root.innerHTML = prod_desc;
 
       // Update other variables if needed
       prod_id = updData.prod_id;
@@ -144,6 +144,7 @@
       prod_stock = updData.prod_stock;
       prod_weight = updData.prod_weight;
       prod_image = updData.prod_image;
+      prod_desc = updData.prod_desc;
 
       // console.log(prod_cate_id);
     } catch (error) {
@@ -198,8 +199,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
-        // await getProduct();
+        // location.reload();
+        await getProduct();
         // console.log(response);
       } else {
         bootstrap.Modal.getInstance(
@@ -257,7 +258,7 @@
                 showConfirmButton: false,
                 timer: 1500,
               });
-              location.reload();
+              // location.reload();
               getProduct();
             }
           });
@@ -281,7 +282,10 @@
 
   async function searchProducts() {
     products = null;
-
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const res = await fetch(
         `${url_API}/products/search/products?page=${page}&record=10`,
@@ -294,6 +298,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }
       ).then((res) => res.json());
@@ -629,8 +634,14 @@
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Description
               </label>
-              <!-- <textarea id="descripstion" rows="4" bind:value={formData.prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				 -->
-              <Ckeditor bind:notes={prod_desc} />
+              <textarea
+                id="descripstion"
+                rows="4"
+                bind:value={formData.prod_desc}
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Please describe your product here..."
+              ></textarea>
+              <!-- <Ckeditor bind:notes={prod_desc} /> -->
             </div>
           </div>
 
@@ -807,17 +818,23 @@
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                 >Description
               </label>
-              <!-- <textarea id="descripstion" rows="4" bind:value={prod_desc} class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Please describe your product here..."></textarea>				 -->
+              <textarea
+                id="descripstion"
+                rows="4"
+                bind:value={prod_desc}
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Please describe your product here..."
+              ></textarea>
               <!-- <Ckeditor bind:notes={prod_desc}/> -->
               <!-- <SvelteQuill bind:this={quill} /> -->
-              <div
+              <!-- <div
                 bind:this={editor}
                 id="editor"
                 class="text-black"
                 on:input={(e) => {
                   prod_desc = e.target.innerHTML;
                 }}
-              />
+              /> -->
             </div>
           </div>
 

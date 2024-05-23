@@ -27,7 +27,10 @@
 
   async function searchGaleries() {
     galleries = null;
-
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const res = await fetch(
         `${url_API}/galleries/admin/searchGaleries/?page=${page}&record=10`,
@@ -40,6 +43,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }
       ).then((res) => res.json());
@@ -76,11 +80,19 @@
     const formDataUpload = new FormData();
     formDataUpload.append("gall_name", gall_name);
     formDataUpload.append("gall_image", gall_image.files[0]);
-
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await dataAPI.post(
         `/galleries/admin/store`,
-        formDataUpload
+        formDataUpload,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
       if (response.status === 200) {
         await Swal.fire({
@@ -89,7 +101,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
+        // location.reload();
+        await fetchGaleries();
       }
     } catch (error) {
       await Swal.fire({
@@ -131,11 +144,19 @@
     formDataWithFile.append("gall_image", cate_image_update.files[0]);
 
     const { cateId } = event.currentTarget.dataset;
-
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await dataAPI.post(
         `/galleries/admin/edit/${cateId}`,
-        formDataWithFile
+        formDataWithFile,
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+        }
       );
 
       if (response.status === 200) {
@@ -145,7 +166,8 @@
           showConfirmButton: false,
           timer: 1500,
         });
-        location.reload();
+        // location.reload();
+        await fetchGaleries();
       } else {
         await Swal.fire({
           icon: "error",

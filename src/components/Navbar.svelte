@@ -143,6 +143,10 @@
     console.log(checkboxValue);
 
     event.preventDefault();
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
 
     try {
       const response = await fetch(
@@ -155,6 +159,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }
       );
@@ -166,6 +171,10 @@
   };
 
   const handleSubmit = async () => {
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await fetch(`${url_API}/address/createAddress`, {
         method: "POST",
@@ -183,6 +192,7 @@
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "X-CSRF-Token": csrfToken,
         },
       });
 
@@ -250,6 +260,10 @@
 
   const handleUpdateData = async (addressId) => {
     // const { addressId } = e.currentTarget.dataset;
+    const csrfToken = localStorage.getItem("csrftoken");
+    if (!csrfToken) {
+      throw new Error("CSRF token not found.");
+    }
     try {
       const response = await fetch(
         `${url_API}/address/editAddress/${addressId}`,
@@ -269,6 +283,7 @@
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "X-CSRF-Token": csrfToken,
           },
         }
       );
@@ -315,6 +330,33 @@
       console.log(error);
     }
   };
+  let isOpen = false;
+
+  function toggleDropdown() {
+    isOpen = !isOpen;
+  }
+
+  function openDropdown() {
+    isOpen = true;
+  }
+
+  function closeDropdown() {
+    isOpen = false;
+  }
+
+  let isOpen1 = false;
+
+  function toggleDropdown1() {
+    isOpen1 = !isOpen1;
+  }
+
+  function openDropdown1() {
+    isOpen1 = true;
+  }
+
+  function closeDropdown1() {
+    isOpen1 = false;
+  }
 
   onMount(async () => {
     await countCartBadge();
@@ -473,94 +515,112 @@
               class:active={$page.url.pathname.includes("/guest/categories")}
               >Categories</a
             >
-            <a
-              href="/login"
-              class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-              class:active={$page.url.pathname.includes("/login")}
-              id="dropdownHoverButton1"
-              data-dropdown-toggle="dropdownHover1"
-              data-dropdown-trigger="hover">Cart</a
-            >
-            <div
-              id="dropdownHover1"
-              class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
-            >
-              <ul
-                class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                aria-labelledby="dropdownHoverButton1"
+            <div class="relative inline-block text-left mt-2">
+              <a
+                href="/login"
+                class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+                class:active={$page.url.pathname.includes("/login")}
+                on:mouseenter={openDropdown}
+                on:mouseleave={closeDropdown}
               >
-                <li>
-                  <a href="#" class="block px-4 py-2">
-                    <div class="flex justify-center items-center">
-                      <img
-                        class="w-48 px-3 py-3"
-                        src="/empty-logo.png"
-                        alt=""
-                      />
-                    </div>
-                    <div class="flex justify-center items-center">
-                      <p
-                        class=" text-center text-sm font-semibold uppercase text-gray-800"
-                      >
-                        No product yet
-                      </p>
-                    </div>
-                    <div class="flex justify-center items-center">
-                      <p class=" text-center text-sm font-medium text-gray-800">
-                        Please Sign in
-                      </p>
-                    </div>
-                  </a>
-                </li>
-              </ul>
+                Cart
+              </a>
+              {#if isOpen}
+                <div
+                  class="z-10 absolute left-0 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                  on:mouseenter={openDropdown}
+                  on:mouseleave={closeDropdown}
+                >
+                  <ul
+                    class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                    aria-labelledby="dropdownHoverButton1"
+                  >
+                    <li>
+                      <a href="#" class="block px-4 py-2">
+                        <div class="flex justify-center items-center">
+                          <img
+                            class="w-48 px-3 py-3"
+                            src="/empty-logo.png"
+                            alt="Empty Cart"
+                          />
+                        </div>
+                        <div class="flex justify-center items-center">
+                          <p
+                            class="text-center text-sm font-semibold uppercase text-gray-800"
+                          >
+                            No product yet
+                          </p>
+                        </div>
+                        <div class="flex justify-center items-center">
+                          <p
+                            class="text-center text-sm font-medium text-gray-800"
+                          >
+                            Please Sign in
+                          </p>
+                        </div>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              {/if}
             </div>
+
             <a
               href="/guest/about"
               class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
               class:active={$page.url.pathname.includes("/guest/about")}
               >About</a
             >
-            <a
-              href="/login"
-              class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
-              class:active={$page.url.pathname.includes("/login")}
-              id="dropdownHoverButton"
-              data-dropdown-toggle="dropdownHover"
-              data-dropdown-trigger="hover">Orders</a
-            >
-            <div
-              id="dropdownHover"
-              class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
-            >
-              <ul
-                class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                aria-labelledby="dropdownHoverButton"
+            <div class="relative inline-block text-left mt-2">
+              <a
+                href="/login"
+                class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"
+                class:active={$page.url.pathname.includes("/login")}
+                on:mouseenter={openDropdown1}
+                on:mouseleave={closeDropdown1}
               >
-                <li>
-                  <a href="#" class="block px-4 py-2">
-                    <div class="flex justify-center items-center">
-                      <img
-                        class="w-48 px-3 py-3"
-                        src="/empty-logo.png"
-                        alt=""
-                      />
-                    </div>
-                    <div class="flex justify-center items-center">
-                      <p
-                        class=" text-center text-sm font-semibold uppercase text-gray-800"
-                      >
-                        No orders yet
-                      </p>
-                    </div>
-                    <div class="flex justify-center items-center">
-                      <p class=" text-center text-sm font-medium text-gray-800">
-                        Please Sign in
-                      </p>
-                    </div>
-                  </a>
-                </li>
-              </ul>
+                Orders
+              </a>
+              {#if isOpen1}
+                <div
+                  class="z-10 absolute left-0 mt-2 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
+                  on:mouseenter={openDropdown}
+                  on:mouseleave={closeDropdown1}
+                >
+                  <ul
+                    class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                    aria-labelledby="dropdownHoverButton1"
+                  >
+                    <li>
+                      <a href="#" class="block px-4 py-2">
+                        <div class="flex justify-center items-center">
+                          <img
+                            class="w-48 px-3 py-3"
+                            src="/empty-logo.png"
+                            alt="Empty Cart"
+                          />
+                        </div>
+                        <div class="flex justify-center items-center">
+                          <p
+                            class="text-center text-sm font-semibold uppercase text-gray-800"
+                          >
+                            No product yet
+                          </p>
+                        </div>
+                        <div class="flex justify-center items-center">
+                          <p
+                            class="text-center text-sm font-medium text-gray-800"
+                          >
+                            Please Sign in
+                          </p>
+                        </div>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              {/if}
             </div>
+
             <a
               href="/login"
               class="text-black rounded-md px-3 py-2 font-medium hover:bg-gray-200"

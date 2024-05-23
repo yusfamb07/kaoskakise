@@ -2,7 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
+@layer base {
+  @font-face {
+    font-family: helvetica;
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(/Helvetica.ttf);
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+span,
+p,
+a,
+button {
+  font-family: helvetica;
+  font-style: normal;
+}
+/* @font-face {
   font-family: nats;
   src: url(/NATS-Regular.ttf);
 }
@@ -18,7 +42,7 @@
 
 .font-nats {
   font-family: nats;
-}
+} */
 
 .font-roboto {
   font-family: "Roboto", sans-serif;
